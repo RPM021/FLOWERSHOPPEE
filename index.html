@@ -161,6 +161,18 @@
     z-index: 1;
     pointer-events:none;
   }
+  .drop-zone .vase-base .vase-layer,
+  .vase-stage .vase-base .vase-layer{
+    pointer-events:none;
+  }
+  .drop-zone .vase-base .vase-back-layer,
+  .vase-stage .vase-base .vase-back-layer{
+    z-index: 1;
+  }
+  .drop-zone .vase-base .vase-front-layer,
+  .vase-stage .vase-base .vase-front-layer{
+    z-index: 3;
+  }
   .empty-vase-msg{
     position:absolute;
     top: 16px; left:0; right:0;
@@ -177,10 +189,26 @@
     transform-origin: bottom center;
     transition: left .4s cubic-bezier(.34,1.3,.64,1), bottom .4s cubic-bezier(.34,1.3,.64,1), transform .4s cubic-bezier(.34,1.3,.64,1);
   }
+  .placed-flower-d.stem-layer{ z-index: 2; }
+  .placed-flower-d.head-layer{ z-index: 4; }
   .placed-flower-d svg{
-    width: 100%; height:100%;
+    width: 100%; height:100%; display:block;
     filter: drop-shadow(0 3px 4px rgba(120,90,90,0.18));
     pointer-events:none;
+  }
+  .placed-flower-d .flower-stem-layer,
+  .placed-flower-d .flower-head-layer,
+  .placed-flower .flower-stem-layer,
+  .placed-flower .flower-head-layer{
+    position:absolute; inset:0; width:100%; height:100%; pointer-events:none;
+  }
+  .placed-flower-d .flower-stem-layer svg,
+  .placed-flower .flower-stem-layer svg{
+    clip-path: inset(50% 0 0 0);
+  }
+  .placed-flower-d .flower-head-layer svg,
+  .placed-flower .flower-head-layer svg{
+    clip-path: inset(0 0 50% 0);
   }
   .placed-flower-d .del-x{
     position:absolute;
@@ -258,6 +286,31 @@
   }
   .tray-flower-card .swatch{
     width: 14px; height:14px;
+  }
+  .vase-picker-wrap{
+    padding: 0 14px 10px;
+  }
+  .vase-picker{
+    display:flex;
+    justify-content:center;
+    gap: 8px;
+    flex-wrap:wrap;
+  }
+  .vase-option{
+    border: 1px solid rgba(190,150,150,0.25);
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight:700;
+    padding: 7px 10px;
+    border-radius: 999px;
+    transition: background .2s ease, transform .15s ease, border-color .2s ease;
+  }
+  .vase-option:hover{ background: var(--blush); transform: translateY(-1px); }
+  .vase-option.selected{
+    background: linear-gradient(135deg, var(--blush-deep), var(--gold));
+    color: var(--white);
+    border-color: transparent;
   }
 
   /* the floating ghost element that follows the pointer while dragging */
@@ -371,8 +424,10 @@
     transform-origin: bottom center;
     transition: left .55s cubic-bezier(.34,1.3,.64,1), bottom .55s cubic-bezier(.34,1.3,.64,1), transform .55s cubic-bezier(.34,1.3,.64,1);
   }
+  .placed-flower.stem-layer{ z-index:2; }
+  .placed-flower.head-layer{ z-index:4; }
   .placed-flower svg{
-    width: 100%; height:100%;
+    width: 100%; height:100%; display:block;
     filter: drop-shadow(0 3px 4px rgba(120,90,90,0.18));
   }
 
@@ -589,17 +644,14 @@
           <path d="M36 105 C28 101 22 105 18 113 C26 115 32 113 36 107 Z" fill="#6a9a57"/>
           <path d="M38 128 C46 124 52 128 56 136 C48 138 42 136 38 130 Z" fill="#5e8a4d"/>
           <g>
-            <!-- outer ring of loose outer petals -->
             <ellipse cx="22" cy="36" rx="11" ry="15" transform="rotate(-35 22 36)" fill="${shade(c,10)}"/>
             <ellipse cx="58" cy="36" rx="11" ry="15" transform="rotate(35 58 36)" fill="${shade(c,6)}"/>
             <ellipse cx="40" cy="22" rx="14" ry="12" fill="${shade(c,8)}"/>
             <ellipse cx="26" cy="50" rx="12" ry="14" transform="rotate(-15 26 50)" fill="${shade(c,-2)}"/>
             <ellipse cx="54" cy="50" rx="12" ry="14" transform="rotate(15 54 50)" fill="${shade(c,-4)}"/>
-            <!-- mid ring -->
             <ellipse cx="32" cy="34" rx="10" ry="12" transform="rotate(-20 32 34)" fill="${shade(c,4)}"/>
             <ellipse cx="48" cy="34" rx="10" ry="12" transform="rotate(20 48 34)" fill="${c}"/>
             <ellipse cx="40" cy="42" rx="11" ry="10" fill="${shade(c,-6)}"/>
-            <!-- inner spiral swirl, the rose's signature look -->
             <path d="M40 38 C46 36 48 30 44 26 C40 23 35 25 35 30 C35 34 39 36 42 34" fill="none" stroke="${shade(c,-16)}" stroke-width="2.4" stroke-linecap="round"/>
             <circle cx="40" cy="33" r="5" fill="${shade(c,-12)}"/>
           </g>
@@ -729,6 +781,112 @@
             <ellipse cx="52" cy="122" rx="8" ry="5" transform="rotate(25 52 122)"/>
           </g>
         </svg>`
+    },
+    {
+      id: 'carnation', name: 'Carnation', size: 'medium', role: 'accent',
+      colors: ['red','pink','white','peach'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 58 C38 90 40 122 37 152" stroke="#6a9a57" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <path d="M37 100 C29 98 24 102 20 111 C28 111 35 108 37 102 Z" fill="#7aab66"/>
+          <path d="M39 125 C47 122 53 126 56 135 C48 136 42 133 39 127 Z" fill="#5e8a4d"/>
+          <g fill="${c}">
+            <path d="M40 18 C35 24 31 28 26 34 C32 38 38 38 40 31 Z"/>
+            <path d="M40 18 C45 24 49 28 54 34 C48 38 42 38 40 31 Z"/>
+            <path d="M40 28 C34 32 30 38 26 46 C34 48 39 47 41 40 Z"/>
+            <path d="M40 28 C46 32 50 38 54 46 C46 48 41 47 39 40 Z"/>
+            <path d="M40 38 C35 41 32 48 30 56 C37 56 43 54 43 47 Z"/>
+            <path d="M40 38 C45 41 48 48 50 56 C43 56 37 54 37 47 Z"/>
+          </g>
+          <circle cx="40" cy="34" r="6" fill="${shade(c,-8)}"/>
+        </svg>`
+    },
+    {
+      id: 'hydrangea', name: 'Hydrangea', size: 'large', role: 'focal',
+      colors: ['pink','lavenderC','white','blue'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 56 C38 90 40 123 36 152" stroke="#6a9a57" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+          <path d="M36 102 C27 99 20 103 17 112 C25 113 32 110 36 104 Z" fill="#7aab66"/>
+          <path d="M39 128 C47 124 54 129 58 138 C49 139 42 136 39 130 Z" fill="#5e8a4d"/>
+          <g fill="${c}">
+            <ellipse cx="40" cy="24" rx="15" ry="12"/>
+            <ellipse cx="28" cy="34" rx="11" ry="10"/>
+            <ellipse cx="52" cy="34" rx="11" ry="10"/>
+            <ellipse cx="32" cy="48" rx="10" ry="9"/>
+            <ellipse cx="48" cy="48" rx="10" ry="9"/>
+            <ellipse cx="40" cy="42" rx="10" ry="9"/>
+          </g>
+          <circle cx="40" cy="36" r="6" fill="${shade(c,-10)}"/>
+        </svg>`
+    },
+    {
+      id: 'ranunculus', name: 'Ranunculus', size: 'medium', role: 'accent',
+      colors: ['pink','white','peach','yellow'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 56 C38 90 40 122 37 152" stroke="#6a9a57" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <path d="M37 102 C28 100 22 104 18 112 C27 113 32 110 37 104 Z" fill="#7aab66"/>
+          <path d="M39 127 C48 124 53 128 57 137 C49 138 42 135 39 129 Z" fill="#5e8a4d"/>
+          <g fill="${c}">
+            <ellipse cx="40" cy="24" rx="13" ry="16"/>
+            <ellipse cx="29" cy="31" rx="9" ry="13" transform="rotate(-25 29 31)"/>
+            <ellipse cx="51" cy="31" rx="9" ry="13" transform="rotate(25 51 31)"/>
+            <ellipse cx="27" cy="44" rx="8" ry="12" transform="rotate(-40 27 44)"/>
+            <ellipse cx="53" cy="44" rx="8" ry="12" transform="rotate(40 53 44)"/>
+            <ellipse cx="40" cy="44" rx="8" ry="12"/>
+          </g>
+          <circle cx="40" cy="34" r="7" fill="${shade(c,-9)}"/>
+        </svg>`
+    },
+    {
+      id: 'statice', name: 'Statice', size: 'filler', role: 'filler',
+      colors: ['lavenderC','blue','white'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 58 C37 90 39 122 36 152" stroke="#7aab66" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M36 104 C28 102 23 105 20 112 C29 112 34 109 36 104 Z" fill="#7aab66"/>
+          <path d="M40 126 C48 123 54 127 58 136 C49 137 42 135 40 128 Z" fill="#5e8a4d"/>
+          <g fill="${c}">
+            <circle cx="40" cy="24" r="5"/>
+            <circle cx="25" cy="32" r="5"/>
+            <circle cx="55" cy="32" r="5"/>
+            <circle cx="30" cy="46" r="4.5"/>
+            <circle cx="50" cy="46" r="4.5"/>
+            <circle cx="40" cy="42" r="4.5"/>
+          </g>
+        </svg>`
+    }
+  ];
+
+  const VASES = [
+    {
+      id: 'classic', name: 'Classic', openingPoint: { x: 0, y: 30 },
+      svg: `
+        <path class="vase-layer vase-back-layer" d="M70 24 C70 12 150 12 150 24 L160 72 C176 92 180 132 166 162 C151 190 69 190 54 162 C40 132 44 92 60 72 Z" fill="var(--lavender)" stroke="${shade('#e3d6f0',-15)}" stroke-width="2"/>
+        <ellipse class="vase-layer vase-back-layer" cx="110" cy="26" rx="40" ry="8" fill="${shade('#e3d6f0',-8)}" opacity="0.6"/>
+        <path class="vase-layer vase-front-layer" d="M70 34 C70 24 150 24 150 34 L152 56 C154 62 157 70 158 76 C164 102 160 142 147 158 C135 172 85 172 73 158 C60 142 56 102 62 76 C63 70 66 62 68 56 Z" fill="${shade('#e3d6f0',-6)}" opacity="0.95"/>
+        <path class="vase-layer vase-front-layer" d="M70 24 C70 12 150 12 150 24" fill="none" stroke="${shade('#e3d6f0',-20)}" stroke-width="2"/>
+        <ellipse class="vase-layer vase-front-layer" cx="90" cy="64" rx="10" ry="22" fill="#ffffff" opacity="0.24"/>
+      `
+    },
+    {
+      id: 'round', name: 'Round', openingPoint: { x: 0, y: 34 },
+      svg: `
+        <path class="vase-layer vase-back-layer" d="M82 28 C82 16 138 16 138 28 L146 72 C154 100 155 136 140 164 C128 186 92 186 80 164 C65 136 66 100 74 72 Z" fill="var(--blush)" stroke="${shade('#eab8c2',-18)}" stroke-width="2"/>
+        <path class="vase-layer vase-back-layer" d="M88 26 C88 20 132 20 132 26 C132 34 125 42 110 42 C95 42 88 34 88 26 Z" fill="${shade('#eab8c2',-10)}" opacity="0.75"/>
+        <path class="vase-layer vase-front-layer" d="M86 40 C86 32 134 32 134 40 L136 58 C138 68 138 84 132 98 C126 110 120 118 110 118 C100 118 94 110 88 98 C82 84 82 68 84 58 Z" fill="${shade('#eab8c2',-6)}" opacity="0.95"/>
+        <ellipse class="vase-layer vase-front-layer" cx="110" cy="58" rx="12" ry="20" fill="#ffffff" opacity="0.2"/>
+      `
+    },
+    {
+      id: 'cylinder', name: 'Cylinder', openingPoint: { x: 0, y: 28 },
+      svg: `
+        <rect class="vase-layer vase-back-layer" x="76" y="30" width="68" height="128" rx="18" fill="var(--sage)" stroke="${shade('#b9c9a9',-14)}" stroke-width="2"/>
+        <rect class="vase-layer vase-back-layer" x="86" y="22" width="48" height="18" rx="9" fill="${shade('#b9c9a9',-7)}" opacity="0.75"/>
+        <rect class="vase-layer vase-front-layer" x="76" y="40" width="68" height="16" rx="8" fill="${shade('#b9c9a9',-4)}"/>
+        <rect class="vase-layer vase-front-layer" x="84" y="60" width="52" height="16" rx="8" fill="#ffffff" opacity="0.18"/>
+      `
     }
   ];
 
@@ -755,13 +913,15 @@
   let state = {
     step: 1,
     selectedColors: {},       // flowerId -> current swatch color key chosen in UI
-    placedFlowers: [],        // array of {flowerId, colorKey, uid, x, y, size, rotation, z} — manually placed in the vase
+    placedFlowers: [],        // array of {flowerId, colorKey, uid, x, bottomOffset, width, height, rotation, z} — manually placed in the vase
+    selectedVase: 'classic',
     to: '',
     from: '',
     message: ''
   };
 
   const MAX_FLOWERS = 9;
+  const PLACED_FLOWER_HEIGHT = 106;
   let uidCounter = 0;
 
   const root = document.getElementById('app');
@@ -834,6 +994,11 @@
         </div>
 
         <div class="flower-tray-bar">
+          <div class="vase-picker-wrap">
+            <div class="vase-picker" role="group" aria-label="Choose a vase">
+              ${VASES.map(vase => `<button class="vase-option ${state.selectedVase === vase.id ? 'selected' : ''}" data-vase="${vase.id}" type="button">${vase.name}</button>`).join('')}
+            </div>
+          </div>
           <div class="tray-scroll" id="trayScroll">${trayCards}</div>
           <div style="display:flex; justify-content:center; margin-top:8px;">
             <button class="primary-btn" id="toStep3b" style="padding:10px 26px; font-size:14px;" ${count === 0 ? 'disabled' : ''}>Looks Lovely — Continue 💌</button>
@@ -855,46 +1020,17 @@
     }
   }
 
-  // Slot layout: a fixed fan of stem-base positions above the vase rim, designed to
-  // mimic how a real bouquet is gathered — greenery/filler sit low & wide at the back,
-  // focal flowers rise taller and closer to center-front. Each slot is expressed as a
-  // fraction of the drop-zone's width/height so it scales responsively, plus a
-  // rotation (stem lean) and a relative depth (z) for front/back layering.
-  // Slot layout: positions are defined as a pixel OFFSET from the vase's horizontal
-  // center (not a fraction of the whole drop-zone), so flowers always gather directly
-  // above the vase's rim instead of spreading across the full screen width. Real
-  // bouquets are an hourglass shape — stems converge near the rim, then the heads
-  // fan out modestly above that, with greenery sitting low/wide at the BACK (lowest,
-  // smallest on screen relative to focals) and focal flowers rising tallest and
-  // closest to center-front.
-  const BOUQUET_SLOTS = [
-    // back row — greenery & trailing stems, low and just past the rim edges
-    { xOffset: -58, yFromBottom: 145, rotation: -20, z: 10, depth: 'back' },
-    { xOffset: 58,  yFromBottom: 145, rotation: 20,  z: 10, depth: 'back' },
-    { xOffset: -38, yFromBottom: 160, rotation: -12, z: 12, depth: 'back' },
-    { xOffset: 38,  yFromBottom: 160, rotation: 12,  z: 12, depth: 'back' },
-    // mid row — filler & accent flowers, tucked in closer
-    { xOffset: -26, yFromBottom: 178, rotation: -10, z: 20, depth: 'mid' },
-    { xOffset: 26,  yFromBottom: 178, rotation: 10,  z: 20, depth: 'mid' },
-    { xOffset: 0,   yFromBottom: 188, rotation: 0,   z: 21, depth: 'mid' },
-    { xOffset: -14, yFromBottom: 170, rotation: -6,  z: 19, depth: 'mid' },
-    { xOffset: 14,  yFromBottom: 170, rotation: 6,   z: 19, depth: 'mid' },
-    // front row — focal flowers, tallest, most upright, nearest center
-    { xOffset: -16, yFromBottom: 205, rotation: -7,  z: 30, depth: 'front' },
-    { xOffset: 16,  yFromBottom: 205, rotation: 7,   z: 30, depth: 'front' },
-    { xOffset: 0,   yFromBottom: 215, rotation: 0,   z: 32, depth: 'front' },
-    { xOffset: -8,  yFromBottom: 195, rotation: -3,  z: 28, depth: 'front' },
-    { xOffset: 8,   yFromBottom: 195, rotation: 3,   z: 28, depth: 'front' }
-  ];
+  function getSelectedVase(){
+    return VASES.find(v => v.id === state.selectedVase) || VASES[0];
+  }
 
   function placedFlowerDesignerHTML(item){
     const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
     const hex = COLORS[item.colorKey] || item.colorKey;
     const svgMarkup = f.svg(hex);
-    // anchor at the stem base (bottom-center of the SVG art), not the visual center,
-    // since each flower's stem reaches down to the bottom edge of its box.
-    return `<div class="placed-flower-d" data-uid="${item.uid}" style="left:${item.x}px; bottom:${item.bottomOffset}px; width:${item.size}px; height:${item.size*2}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">
-      ${svgMarkup}
+    return `<div class="placed-flower-d ${item.z >= 20 ? 'head-layer' : 'stem-layer'}" data-uid="${item.uid}" style="left:${item.x}px; bottom:${item.bottomOffset}px; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">
+      <div class="flower-stem-layer">${svgMarkup}</div>
+      <div class="flower-head-layer">${svgMarkup}</div>
       <button class="del-x" data-del="${item.uid}" aria-label="Remove this flower" style="top:-8px;">✕</button>
     </div>`;
   }
@@ -909,9 +1045,10 @@
         e.stopPropagation();
         const uid = btn.getAttribute('data-del');
         const flower = state.placedFlowers.find(p => p.uid === uid);
-        if(flower) occupiedSlots.delete(flower.slotIndex);
-        state.placedFlowers = state.placedFlowers.filter(p => p.uid !== uid);
-        renderStep1();
+        if(flower) {
+          state.placedFlowers = state.placedFlowers.filter(p => p.uid !== uid);
+          renderStep1();
+        }
       });
     });
 
@@ -946,81 +1083,75 @@
         renderStep1();
       });
     });
-  }
 
-  function sizeForRole(role){
-    if(role === 'greenery') return Math.round(rand(46,56));
-    if(role === 'filler') return Math.round(rand(38,46));
-    if(role === 'accent') return Math.round(rand(44,52));
-    return Math.round(rand(56,68)); // focal — the largest, most prominent
-  }
-
-  // tracks which slot indices currently have a flower, so two flowers never overlap
-  let occupiedSlots = new Set();
-
-  // find the open slot whose on-screen position is nearest to the pointer's drop point.
-  // dropZoneRect gives us pixel dimensions to convert each slot's fractional/offset
-  // definition into real coordinates for distance comparison.
-  function findNearestOpenSlot(dropX, dropY, dropZoneRect){
-    const vaseCenterX = dropZoneRect.width / 2; // vase is always horizontally centered in the drop zone
-    let best = null, bestDist = Infinity;
-    BOUQUET_SLOTS.forEach((slot, idx) => {
-      if(occupiedSlots.has(idx)) return;
-      const slotX = vaseCenterX + slot.xOffset;
-      const slotY = dropZoneRect.height - slot.yFromBottom;
-      const dist = Math.hypot(dropX - slotX, dropY - slotY);
-      if(dist < bestDist){
-        bestDist = dist;
-        best = idx;
-      }
+    root.querySelectorAll('.vase-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.selectedVase = btn.getAttribute('data-vase');
+        renderStep1();
+      });
     });
-    return best;
   }
 
-  function placeFlowerInSlot(flowerId, colorKey, slotIndex, dropZoneRect){
-    const f = FLOWER_TYPES.find(x => x.id === flowerId);
-    const slot = BOUQUET_SLOTS[slotIndex];
-    const size = sizeForRole(f.role);
-    const vaseCenterX = dropZoneRect.width / 2;
-    occupiedSlots.add(slotIndex);
+  function getPlacementForFlower(index, dropZoneRect){
+    const vase = getSelectedVase();
+    const openingX = dropZoneRect.width / 2 + vase.openingPoint.x;
+    const openingY = dropZoneRect.height - vase.openingPoint.y;
+    const spread = 12 + Math.min(28, index * 8);
+    const angle = (-0.28 + index * 0.08) + ((index % 2) ? 0.06 : -0.06);
+    const x = openingX + Math.cos(angle) * spread;
+    const bottomOffset = openingY - 18 - index * 7;
+    const rotation = (-10 + index * 3) + ((index % 2) ? 5 : -5);
+    const scale = PLACED_FLOWER_HEIGHT / 160;
+    return {
+      x: Math.round(x),
+      bottomOffset: Math.round(bottomOffset),
+      rotation: Math.round(rotation),
+      width: Math.round(80 * scale),
+      height: PLACED_FLOWER_HEIGHT,
+      z: 18 + (index < 4 ? 2 : 0) + (index % 2 ? 1 : 0)
+    };
+  }
+
+  function placeFlowerInSlot(flowerId, colorKey, dropZoneRect, index){
+    const placement = getPlacementForFlower(index, dropZoneRect);
     uidCounter++;
     state.placedFlowers.push({
       flowerId, colorKey, uid: 'p'+uidCounter,
-      slotIndex,
-      x: Math.round(vaseCenterX + slot.xOffset),
-      bottomOffset: slot.yFromBottom - size, // SVG's own height extends upward from stem base
-      size,
-      rotation: slot.rotation,
-      z: slot.z
+      x: placement.x,
+      bottomOffset: placement.bottomOffset,
+      width: placement.width,
+      height: placement.height,
+      rotation: placement.rotation,
+      z: placement.z
     });
   }
 
   function dropFlowerAtCenter(flowerId, colorKey){
     const dropZone = document.getElementById('dropZone');
+    if(!dropZone) return;
     const rect = dropZone.getBoundingClientRect();
-    const slotIndex = findNearestOpenSlot(rect.width/2, rect.height - 200, rect);
-    if(slotIndex === null) return; // all slots full (shouldn't happen since slots > MAX_FLOWERS)
-    placeFlowerInSlot(flowerId, colorKey, slotIndex, rect);
+    placeFlowerInSlot(flowerId, colorKey, rect, state.placedFlowers.length);
     renderStep1();
   }
 
   function startDrag(flowerId, colorKey, startX, startY, handleEl){
-    const f = FLOWER_TYPES.find(x => x.id === flowerId);
     const hex = COLORS[colorKey] || colorKey;
-    const size = sizeForRole(f.role);
+    const scale = PLACED_FLOWER_HEIGHT / 160;
+    const width = Math.round(80 * scale);
+    const height = PLACED_FLOWER_HEIGHT;
 
     const ghost = document.createElement('div');
     ghost.className = 'drag-ghost';
-    ghost.style.width = size + 'px';
-    ghost.style.height = (size*2) + 'px';
+    ghost.style.width = width + 'px';
+    ghost.style.height = height + 'px';
     ghost.style.left = startX + 'px';
     ghost.style.top = startY + 'px';
-    ghost.innerHTML = f.svg(hex);
+    ghost.innerHTML = FLOWER_TYPES.find(x => x.id === flowerId).svg(hex);
     document.body.appendChild(ghost);
     document.body.classList.add('dragging-flower');
     handleEl.classList.add('lifting');
 
-    dragState = { flowerId, colorKey, size, ghostEl: ghost, handleEl };
+    dragState = { flowerId, colorKey, ghostEl: ghost, handleEl };
 
     function onMove(e){
       if(!dragState) return;
@@ -1048,10 +1179,7 @@
         const rect = dropZone.getBoundingClientRect();
         const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
         if(inside && state.placedFlowers.length < MAX_FLOWERS){
-          const slotIndex = findNearestOpenSlot(x - rect.left, y - rect.top, rect);
-          if(slotIndex !== null){
-            placeFlowerInSlot(dragState.flowerId, dragState.colorKey, slotIndex, rect);
-          }
+          placeFlowerInSlot(dragState.flowerId, dragState.colorKey, rect, state.placedFlowers.length);
         }
       }
       cleanup();
@@ -1076,13 +1204,10 @@
 
   /* ---------------- STATIC VASE PREVIEW (used in steps 3 & 4) ---------------- */
   function vaseSVG(){
+    const vase = getSelectedVase();
     return `
     <svg class="vase-base" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
-      <path d="M70 20 C70 10 150 10 150 20 L160 70 C175 90 180 130 165 160 C150 185 70 185 55 160 C40 130 45 90 60 70 Z"
-        fill="var(--lavender)" stroke="${shade('#e3d6f0',-15)}" stroke-width="2"/>
-      <ellipse cx="110" cy="22" rx="40" ry="8" fill="${shade('#e3d6f0',-8)}" opacity="0.6"/>
-      <path d="M70 20 C70 10 150 10 150 20" fill="none" stroke="${shade('#e3d6f0',-20)}" stroke-width="2"/>
-      <ellipse cx="90" cy="60" rx="10" ry="22" fill="#ffffff" opacity="0.25"/>
+      ${vase.svg}
     </svg>`;
   }
 
@@ -1096,7 +1221,10 @@
     const svgMarkup = f.svg(hex);
     const left = `${Math.round(item.normX * stageWidth)}px`;
     const bottom = `${Math.round(item.normBottom * stageHeight)}px`;
-    return `<div class="placed-flower" style="left:${left}; bottom:${bottom}; width:${item.size}px; height:${item.size*2}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">${svgMarkup}</div>`;
+    return `<div class="placed-flower ${item.z >= 20 ? 'head-layer' : 'stem-layer'}" style="left:${left}; bottom:${bottom}; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">
+      <div class="flower-stem-layer">${svgMarkup}</div>
+      <div class="flower-head-layer">${svgMarkup}</div>
+    </div>`;
   }
 
   function ribbonSVG(){
@@ -1234,7 +1362,7 @@
     `;
 
     document.getElementById('restartBtn').addEventListener('click', () => {
-      state = { step:1, selectedColors:{}, placedFlowers:[], previewArrangement:[], to:'', from:'', message:'' };
+      state = { step:1, selectedColors:{}, placedFlowers:[], previewArrangement:[], selectedVase:'classic', to:'', from:'', message:'' };
       render();
     });
   }
