@@ -1028,11 +1028,15 @@
     const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
     const hex = COLORS[item.colorKey] || item.colorKey;
     const svgMarkup = f.svg(hex);
-    return `<div class="placed-flower-d ${item.z >= 20 ? 'head-layer' : 'stem-layer'}" data-uid="${item.uid}" style="left:${item.x}px; bottom:${item.bottomOffset}px; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">
-      <div class="flower-stem-layer">${svgMarkup}</div>
-      <div class="flower-head-layer">${svgMarkup}</div>
-      <button class="del-x" data-del="${item.uid}" aria-label="Remove this flower" style="top:-8px;">✕</button>
-    </div>`;
+    const baseStyle = `left:${item.x}px; bottom:${item.bottomOffset}px; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg);`;
+    return `
+      <div class="placed-flower-d stem-layer" data-uid="${item.uid}" style="${baseStyle} z-index:${item.stemZ};">
+        <div class="flower-stem-layer">${svgMarkup}</div>
+      </div>
+      <div class="placed-flower-d head-layer" data-uid="${item.uid}" style="${baseStyle} z-index:${item.headZ};">
+        <div class="flower-head-layer">${svgMarkup}</div>
+        <button class="del-x" data-del="${item.uid}" aria-label="Remove this flower" style="top:-8px;">✕</button>
+      </div>`;
   }
 
   function rand(min,max){ return Math.random()*(max-min)+min; }
@@ -1094,13 +1098,16 @@
 
   function getPlacementForFlower(index, dropZoneRect){
     const vase = getSelectedVase();
+    const vaseSvgWidth = 220;
+    const vaseSvgHeight = 200;
+    const vaseRenderHeight = 200 * vaseSvgHeight / vaseSvgWidth;
     const openingX = dropZoneRect.width / 2 + vase.openingPoint.x;
-    const openingY = dropZoneRect.height - vase.openingPoint.y;
-    const spread = 12 + Math.min(28, index * 8);
-    const angle = (-0.28 + index * 0.08) + ((index % 2) ? 0.06 : -0.06);
+    const openingY = vaseRenderHeight - vase.openingPoint.y * (vaseRenderHeight / vaseSvgHeight);
+    const spread = 10 + Math.min(24, index * 7);
+    const angle = (-0.24 + index * 0.06) + ((index % 2) ? 0.04 : -0.04);
     const x = openingX + Math.cos(angle) * spread;
-    const bottomOffset = openingY - 18 - index * 7;
-    const rotation = (-10 + index * 3) + ((index % 2) ? 5 : -5);
+    const bottomOffset = openingY - 10 - index * 5;
+    const rotation = (-8 + index * 2) + ((index % 2) ? 4 : -4);
     const scale = PLACED_FLOWER_HEIGHT / 160;
     return {
       x: Math.round(x),
@@ -1108,7 +1115,8 @@
       rotation: Math.round(rotation),
       width: Math.round(80 * scale),
       height: PLACED_FLOWER_HEIGHT,
-      z: 18 + (index < 4 ? 2 : 0) + (index % 2 ? 1 : 0)
+      stemZ: 2 + index,
+      headZ: 30 + index
     };
   }
 
@@ -1221,10 +1229,14 @@
     const svgMarkup = f.svg(hex);
     const left = `${Math.round(item.normX * stageWidth)}px`;
     const bottom = `${Math.round(item.normBottom * stageHeight)}px`;
-    return `<div class="placed-flower ${item.z >= 20 ? 'head-layer' : 'stem-layer'}" style="left:${left}; bottom:${bottom}; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">
-      <div class="flower-stem-layer">${svgMarkup}</div>
-      <div class="flower-head-layer">${svgMarkup}</div>
-    </div>`;
+    const baseStyle = `left:${left}; bottom:${bottom}; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg);`;
+    return `
+      <div class="placed-flower stem-layer" style="${baseStyle} z-index:${item.stemZ};">
+        <div class="flower-stem-layer">${svgMarkup}</div>
+      </div>
+      <div class="placed-flower head-layer" style="${baseStyle} z-index:${item.headZ};">
+        <div class="flower-head-layer">${svgMarkup}</div>
+      </div>`;
   }
 
   function ribbonSVG(){
