@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A Little Bouquet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap');
+
+  :root{
+    --cream: #fdf8f3;
+    --blush: #f7dce0;
+    --blush-deep: #eab8c2;
+    --lavender: #e3d6f0;
+    --sage: #b9c9a9;
+    --sage-deep: #94a87f;
+    --ink: #5b4a4f;
+    --ink-soft: #8a7a7e;
+    --gold: #e3b97f;
+    --white: #fffaf6;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; width:100%; min-height:100vh;
+    font-family:'Quicksand', sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--cream) 0%, #f9eee8 50%, var(--blush) 100%);
+    overflow-x:hidden;
+  }
+
+  button{ font-family:inherit; cursor:pointer; }
+  button:focus-visible, .swatch:focus-visible, .flower-card:focus-visible {
+    outline: 3px solid var(--sage-deep);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  .app{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+    min-height: 100vh;
+  }
+  .app.full-bleed{
+    max-width: none;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  /* ---------- Header ---------- */
+  .app-header{
+    text-align:center;
+    margin-bottom: 18px;
+  }
+  .app-header .eyebrow{
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    font-weight:600;
+  }
+  .app-header h1{
+    font-family:'Caveat', cursive;
+    font-size: 52px;
+    margin: 4px 0 0;
+    color: var(--ink);
+    font-weight:700;
+  }
+
+  .step-track{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    margin: 18px 0 6px;
+  }
+  .step-dot{
+    width:9px; height:9px; border-radius:50%;
+    background: #e7d9d2;
+    transition: background .3s ease, transform .3s ease;
+  }
+  .step-dot.active{ background: var(--blush-deep); transform: scale(1.3); }
+  .step-dot.done{ background: var(--sage-deep); }
+
+  .screen{
+    animation: fadeSlideIn .5s ease both;
+  }
+  @keyframes fadeSlideIn{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  /* ---------- Step 1: Drag-and-drop designer ---------- */
+  .intro-text{
+    text-align:center;
+    color: var(--ink-soft);
+    max-width: 480px;
+    margin: 0 auto 14px;
+    font-size: 14.5px;
+    line-height:1.5;
+  }
+
+  .designer{
+    position: fixed;
+    top: 0; left:0; right:0; bottom:0;
+    display:flex;
+    flex-direction:column;
+    background: linear-gradient(160deg, var(--cream) 0%, #f9eee8 50%, var(--blush) 100%);
+  }
+  .designer-header{
+    text-align:center;
+    padding: 14px 16px 6px;
+    flex-shrink:0;
+  }
+  .designer-header h1{
+    font-family:'Caveat', cursive;
+    font-size: 34px;
+    margin: 2px 0 0;
+    color: var(--ink);
+  }
+  .designer-header .eyebrow{
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    font-weight:700;
+  }
+  .designer-hint{
+    text-align:center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    padding: 0 16px 8px;
+    flex-shrink:0;
+  }
+
+  /* drop zone (vase area) fills remaining space */
+  .drop-zone{
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+    min-height: 380px;
+  }
+  .drop-zone.drag-over::before{
+    content:"";
+    position:absolute;
+    inset: 8px;
+    border: 2px dashed var(--blush-deep);
+    border-radius: 24px;
+    pointer-events:none;
+    opacity:.6;
+  }
+  .drop-zone .vase-base{
+    position:absolute;
+    bottom: 0; left:50%;
+    transform: translateX(-50%);
+    width: 200px;
+    z-index: 1;
+    pointer-events:none;
+  }
+  .empty-vase-msg{
+    position:absolute;
+    top: 16px; left:0; right:0;
+    text-align:center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-style: italic;
+    pointer-events:none;
+    z-index: 50;
+  }
+
+  .slot-outline{
+    position:absolute;
+    transform-origin: bottom center;
+    color: var(--blush-deep);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 5;
+    transition: opacity .3s ease, transform .3s ease;
+    animation: outlinePulse 3s ease-in-out infinite;
+  }
+  .slot-outline svg{ width:100%; height:100%; }
+  .slot-outline.slot-outline-dim{
+    opacity: 0.12;
+    animation: none;
+  }
+  @keyframes outlinePulse{
+    0%, 100%{ opacity: 0.4; }
+    50%{ opacity: 0.22; }
+  }
+
+  .placed-flower-d{
+    position:absolute;
+    transform-origin: bottom center;
+    transition: left .4s cubic-bezier(.34,1.3,.64,1), bottom .4s cubic-bezier(.34,1.3,.64,1), transform .4s cubic-bezier(.34,1.3,.64,1);
+  }
+  .placed-flower-d svg{
+    width: 100%; height:100%;
+    filter: drop-shadow(0 3px 4px rgba(120,90,90,0.18));
+    pointer-events:none;
+  }
+  .placed-flower-d .del-x{
+    position:absolute;
+    top:-6px; right:-6px;
+    width: 20px; height:20px;
+    background: var(--white);
+    border-radius:50%;
+    border: none;
+    font-size: 11px;
+    line-height:20px;
+    text-align:center;
+    color: var(--ink-soft);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity .15s ease;
+    z-index: 60;
+  }
+  .placed-flower-d:hover .del-x,
+  .placed-flower-d.recent .del-x{ opacity: 1; }
+
+  /* bottom flower tray, horizontally scrollable */
+  .flower-tray-bar{
+    flex-shrink:0;
+    background: var(--white);
+    border-top: 1px solid rgba(190,150,150,0.18);
+    box-shadow: 0 -6px 18px rgba(190,150,150,0.12);
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .tray-scroll{
+    display:flex;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 4px 14px 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .tray-scroll::-webkit-scrollbar{ height: 5px; }
+  .tray-scroll::-webkit-scrollbar-thumb{ background: var(--blush-deep); border-radius:4px; }
+
+  .tray-flower-card{
+    flex: 0 0 auto;
+    width: 78px;
+    text-align:center;
+    user-select:none;
+  }
+  .tray-flower-card .drag-handle{
+    width: 64px; height:64px;
+    margin: 0 auto;
+    background: var(--cream);
+    border-radius: 16px;
+    display:flex; align-items:center; justify-content:center;
+    cursor: grab;
+    touch-action: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 2px 8px rgba(190,150,150,0.15);
+  }
+  .tray-flower-card .drag-handle:active{ cursor: grabbing; }
+  .tray-flower-card .drag-handle.lifting{
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(190,150,150,0.3);
+  }
+  .tray-flower-card .drag-handle svg{ width: 46px; height:46px; pointer-events:none; }
+  .tray-flower-card .fname{
+    font-size: 11px;
+    font-weight:600;
+    margin: 5px 0 4px;
+    white-space: nowrap;
+  }
+  .tray-flower-card .swatches{
+    display:flex;
+    justify-content:center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .tray-flower-card .swatch{
+    width: 14px; height:14px;
+  }
+
+  /* the floating ghost element that follows the pointer while dragging */
+  .drag-ghost{
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(1.1);
+    filter: drop-shadow(0 6px 10px rgba(120,90,90,0.3));
+  }
+  .drag-ghost svg{ width: 100%; height:100%; }
+
+  body.dragging-flower{
+    cursor: grabbing;
+  }
+  body.dragging-flower .tray-scroll{
+    overflow-x: hidden;
+  }
+
+  .designer-footer{
+    flex-shrink:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap: 12px;
+    padding: 8px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--white);
+    border-top: 1px solid rgba(190,150,150,0.1);
+  }
+  .placed-count{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-weight:600;
+  }
+
+  .primary-btn{
+    display:block;
+    margin: 0 auto;
+    background: linear-gradient(135deg, var(--blush-deep), var(--gold));
+    color: var(--white);
+    border:none;
+    padding: 13px 34px;
+    border-radius: 999px;
+    font-size: 15.5px;
+    font-weight:700;
+    box-shadow: 0 6px 16px rgba(220,160,150,0.35);
+    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  .primary-btn:hover:not(:disabled){ transform: translateY(-2px); box-shadow: 0 9px 20px rgba(220,160,150,0.45); }
+  .primary-btn:active:not(:disabled){ transform: translateY(0) scale(0.97); }
+  .primary-btn:disabled{
+    opacity: 0.4;
+    cursor:not-allowed;
+    box-shadow:none;
+  }
+  .hint-text{
+    text-align:center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  .secondary-btn{
+    background: var(--white);
+    border: 2px solid var(--blush-deep);
+    color: var(--ink);
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-weight:700;
+    font-size: 14px;
+    transition: background .2s ease, transform .15s ease;
+  }
+  .secondary-btn:hover{ background: var(--blush); transform: translateY(-1px); }
+  .secondary-btn:active{ transform: translateY(0) scale(0.96); }
+
+  .ghost-btn{
+    background:none;
+    border:none;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    font-weight:600;
+    text-decoration: underline;
+    padding: 6px;
+  }
+  .ghost-btn:hover{ color: var(--ink); }
+
+  /* ---------- Step 2: Vase scene ---------- */
+  .vase-stage{
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    height: 420px;
+    margin: 0 auto 10px;
+  }
+  .vase-stage svg.vase-base{
+    position:absolute;
+    bottom: 0; left:50%;
+    transform: translateX(-50%);
+    width: 220px;
+    z-index: 1;
+  }
+  .flower-layer{
+    position:absolute;
+    bottom: 150px;
+    left:50%;
+    width:1px; height:1px;
+  }
+  .placed-flower{
+    position:absolute;
+    transform-origin: bottom center;
+    transition: left .55s cubic-bezier(.34,1.3,.64,1), bottom .55s cubic-bezier(.34,1.3,.64,1), transform .55s cubic-bezier(.34,1.3,.64,1);
+  }
+  .placed-flower svg{
+    width: 100%; height:100%;
+    filter: drop-shadow(0 3px 4px rgba(120,90,90,0.18));
+  }
+
+  .step2-actions{
+    display:flex;
+    justify-content:center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 14px 0 6px;
+  }
+
+  /* ---------- Step 3: Dedication card ---------- */
+  .note-card{
+    background: var(--white);
+    max-width: 440px;
+    margin: 0 auto;
+    border-radius: 18px;
+    padding: 26px 26px 22px;
+    box-shadow: 0 10px 26px rgba(190,150,150,0.18);
+    position: relative;
+  }
+  .note-card::before{
+    content:"";
+    position:absolute;
+    top:0; left: 18px; right: 18px;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--blush-deep) 0 14px, transparent 14px 22px);
+    border-radius: 0 0 6px 6px;
+    opacity: .55;
+  }
+  .field-label{
+    font-size: 12.5px;
+    font-weight:700;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing:.05em;
+    margin-bottom: 5px;
+    display:block;
+  }
+  .field-input, .field-textarea{
+    width:100%;
+    border: 2px solid var(--blush);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-family:'Quicksand', sans-serif;
+    font-size: 14.5px;
+    color: var(--ink);
+    margin-bottom: 16px;
+    transition: border-color .2s ease;
+    background: var(--cream);
+  }
+  .field-input:focus, .field-textarea:focus{
+    outline:none;
+    border-color: var(--blush-deep);
+  }
+  .field-textarea{
+    min-height: 100px;
+    resize: vertical;
+    font-family: 'Caveat', cursive;
+    font-size: 20px;
+    line-height: 1.4;
+  }
+  .char-count{
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    text-align:right;
+    margin: -12px 0 14px;
+  }
+
+  /* ---------- Step 4: Reveal ---------- */
+  .reveal-screen{
+    min-height: 80vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position: relative;
+    text-align:center;
+    padding: 20px 0;
+  }
+  .petal-field{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:0;
+  }
+  .petal{
+    position:absolute;
+    top: -5%;
+    opacity: 0;
+    animation: petalFall linear infinite;
+  }
+  @keyframes petalFall{
+    0%{ opacity:0; transform: translateY(0) translateX(0) rotate(0deg); }
+    8%{ opacity:.75; }
+    90%{ opacity:.6; }
+    100%{ opacity:0; transform: translateY(110vh) translateX(var(--drift)) rotate(340deg); }
+  }
+
+  .reveal-vase-wrap{
+    opacity:0;
+    transform: scale(.85);
+    animation: revealPop .8s ease forwards;
+    animation-delay: .1s;
+    position:relative;
+    z-index:2;
+  }
+  @keyframes revealPop{
+    to{ opacity:1; transform: scale(1); }
+  }
+
+  .reveal-note{
+    opacity:0;
+    transform: translateY(16px);
+    animation: revealSlide .7s ease forwards;
+    animation-delay: 1.0s;
+    max-width: 460px;
+    margin: 18px auto 0;
+    background: rgba(255,250,246,0.9);
+    backdrop-filter: blur(2px);
+    border-radius: 18px;
+    padding: 22px 28px;
+    box-shadow: 0 10px 30px rgba(190,150,150,0.2);
+    position:relative;
+    z-index:2;
+  }
+  @keyframes revealSlide{
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .reveal-to{
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing:.08em;
+    font-weight:700;
+    margin-bottom: 6px;
+  }
+  .reveal-message{
+    font-family:'Caveat', cursive;
+    font-size: 26px;
+    line-height: 1.35;
+    color: var(--ink);
+    margin: 6px 0 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .reveal-from{
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .reveal-from span{
+    font-family:'Caveat', cursive;
+    font-size: 20px;
+    color: var(--ink);
+  }
+
+  .sparkle{
+    position:absolute;
+    font-size: 16px;
+    opacity:0;
+    animation: twinkle 2.4s ease-in-out infinite;
+    z-index:1;
+    pointer-events:none;
+  }
+  @keyframes twinkle{
+    0%, 100%{ opacity:0; transform: scale(.6) rotate(0deg); }
+    50%{ opacity:.85; transform: scale(1.05) rotate(20deg); }
+  }
+
+  .restart-wrap{
+    margin-top: 22px;
+    position:relative;
+    z-index:2;
+  }
+
+  .sr-only{
+    position:absolute;
+    width:1px;height:1px;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+  }
+</style>
+</head>
+<body>
+<div id="app" class="app"></div>
+
+<script>
+(function(){
+
+  /* ============================================================
+     FLOWER DEFINITIONS — SVGs with currentColor so fill is set
+     dynamically via inline style. Each flower has color options.
+  ============================================================ */
+
+  const COLORS = {
+    red: '#d96c6c',
+    pink: '#f0a8c0',
+    white: '#fbf6ef',
+    peach: '#f3b98a',
+    yellow: '#f0cf6c',
+    lavenderC: '#bda3da',
+    blue: '#9bb9da'
+  };
+
+  const FLOWER_TYPES = [
+    {
+      id: 'rose', name: 'Rose', size: 'large', role: 'focal',
+      colors: ['red','pink','peach','white'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 56 C36 90 38 120 34 152" stroke="#5e8a4d" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M36 105 C28 101 22 105 18 113 C26 115 32 113 36 107 Z" fill="#6a9a57"/>
+          <path d="M38 128 C46 124 52 128 56 136 C48 138 42 136 38 130 Z" fill="#5e8a4d"/>
+          <g>
+            <!-- outer ring of loose outer petals -->
+            <ellipse cx="22" cy="36" rx="11" ry="15" transform="rotate(-35 22 36)" fill="${shade(c,10)}"/>
+            <ellipse cx="58" cy="36" rx="11" ry="15" transform="rotate(35 58 36)" fill="${shade(c,6)}"/>
+            <ellipse cx="40" cy="22" rx="14" ry="12" fill="${shade(c,8)}"/>
+            <ellipse cx="26" cy="50" rx="12" ry="14" transform="rotate(-15 26 50)" fill="${shade(c,-2)}"/>
+            <ellipse cx="54" cy="50" rx="12" ry="14" transform="rotate(15 54 50)" fill="${shade(c,-4)}"/>
+            <!-- mid ring -->
+            <ellipse cx="32" cy="34" rx="10" ry="12" transform="rotate(-20 32 34)" fill="${shade(c,4)}"/>
+            <ellipse cx="48" cy="34" rx="10" ry="12" transform="rotate(20 48 34)" fill="${c}"/>
+            <ellipse cx="40" cy="42" rx="11" ry="10" fill="${shade(c,-6)}"/>
+            <!-- inner spiral swirl, the rose's signature look -->
+            <path d="M40 38 C46 36 48 30 44 26 C40 23 35 25 35 30 C35 34 39 36 42 34" fill="none" stroke="${shade(c,-16)}" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="40" cy="33" r="5" fill="${shade(c,-12)}"/>
+          </g>
+        </svg>`
+    },
+    {
+      id: 'tulip', name: 'Tulip', size: 'medium', role: 'focal',
+      colors: ['red','pink','white','yellow'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 58 C37 88 39 122 35 152" stroke="#5e8a4d" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M37 100 C28 98 22 104 19 114 C28 114 34 110 37 102 Z" fill="#6a9a57"/>
+          <path d="M39 125 C47 122 53 127 56 136 C48 137 42 134 39 127 Z" fill="#5e8a4d"/>
+          <path d="M40 20 C28 20 26 38 26 46 C26 56 33 60 40 60 C47 60 54 56 54 46 C54 38 52 20 40 20 Z" fill="${c}"/>
+          <path d="M40 24 C34 26 32 38 33 46 C34 53 37 56 40 57 Z" fill="${shade(c,8)}" opacity="0.6"/>
+          <path d="M40 24 C46 26 48 38 47 46 C46 53 43 56 40 57 Z" fill="${shade(c,-6)}" opacity="0.5"/>
+        </svg>`
+    },
+    {
+      id: 'daisy', name: 'Daisy', size: 'small', role: 'accent',
+      colors: ['white','yellow','pink'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 58 C38 90 41 122 38 152" stroke="#6a9a57" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M38 105 C30 103 25 108 22 116 C30 117 35 113 38 107 Z" fill="#7aab66"/>
+          <g fill="${c}">
+            <ellipse cx="40" cy="24" rx="7" ry="14"/>
+            <ellipse cx="40" cy="56" rx="7" ry="14"/>
+            <ellipse cx="24" cy="40" rx="14" ry="7"/>
+            <ellipse cx="56" cy="40" rx="14" ry="7"/>
+            <ellipse cx="29" cy="29" rx="7" ry="14" transform="rotate(45 29 29)"/>
+            <ellipse cx="51" cy="51" rx="7" ry="14" transform="rotate(45 51 51)"/>
+            <ellipse cx="51" cy="29" rx="7" ry="14" transform="rotate(-45 51 29)"/>
+            <ellipse cx="29" cy="51" rx="7" ry="14" transform="rotate(-45 29 51)"/>
+          </g>
+          <circle cx="40" cy="40" r="10" fill="#eec05a"/>
+        </svg>`
+    },
+    {
+      id: 'sunflower', name: 'Sunflower', size: 'large', role: 'focal',
+      colors: ['yellow'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 62 C36 92 40 124 36 152" stroke="#5e8a4d" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M36 100 C25 97 18 103 14 113 C24 115 32 111 36 103 Z" fill="#6a9a57"/>
+          <path d="M39 130 C49 126 56 131 60 141 C50 142 43 139 39 132 Z" fill="#5e8a4d"/>
+          <g fill="${c}">
+            <ellipse cx="40" cy="18" rx="8" ry="16"/>
+            <ellipse cx="40" cy="62" rx="8" ry="16"/>
+            <ellipse cx="18" cy="40" rx="16" ry="8"/>
+            <ellipse cx="62" cy="40" rx="16" ry="8"/>
+            <ellipse cx="25" cy="25" rx="8" ry="16" transform="rotate(45 25 25)"/>
+            <ellipse cx="55" cy="55" rx="8" ry="16" transform="rotate(45 55 55)"/>
+            <ellipse cx="55" cy="25" rx="8" ry="16" transform="rotate(-45 55 25)"/>
+            <ellipse cx="25" cy="55" rx="8" ry="16" transform="rotate(-45 25 55)"/>
+          </g>
+          <circle cx="40" cy="40" r="13" fill="#7a5230"/>
+          <circle cx="40" cy="40" r="13" fill="#8a6038" opacity="0.5"/>
+        </svg>`
+    },
+    {
+      id: 'peony', name: 'Peony', size: 'large', role: 'focal',
+      colors: ['pink','white','peach'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 62 C37 92 39 124 35 152" stroke="#5e8a4d" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M37 102 C28 99 21 104 17 113 C26 115 33 111 37 104 Z" fill="#6a9a57"/>
+          <path d="M39 128 C48 124 55 129 59 138 C50 140 43 137 39 130 Z" fill="#5e8a4d"/>
+          <circle cx="40" cy="40" r="18" fill="${shade(c,6)}"/>
+          <circle cx="32" cy="34" r="9" fill="${c}"/>
+          <circle cx="48" cy="34" r="9" fill="${c}"/>
+          <circle cx="32" cy="46" r="9" fill="${shade(c,-4)}"/>
+          <circle cx="48" cy="46" r="9" fill="${shade(c,-4)}"/>
+          <circle cx="40" cy="30" r="9" fill="${shade(c,3)}"/>
+          <circle cx="40" cy="50" r="9" fill="${shade(c,-8)}"/>
+          <circle cx="40" cy="40" r="9" fill="${shade(c,10)}"/>
+        </svg>`
+    },
+    {
+      id: 'lavender', name: 'Lavender', size: 'filler', role: 'filler',
+      colors: ['lavenderC','blue'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <line x1="40" y1="70" x2="40" y2="152" stroke="#7c9a6c" stroke-width="2.5"/>
+          <g fill="${c}">
+            <circle cx="40" cy="20" r="6"/>
+            <circle cx="33" cy="29" r="6"/>
+            <circle cx="47" cy="29" r="6"/>
+            <circle cx="40" cy="38" r="6"/>
+            <circle cx="33" cy="47" r="6"/>
+            <circle cx="47" cy="47" r="6"/>
+            <circle cx="40" cy="56" r="6"/>
+          </g>
+        </svg>`
+    },
+    {
+      id: 'babybreath', name: "Baby's Breath", size: 'filler', role: 'filler',
+      colors: ['white'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 152 L32 56 M40 152 L48 50 M40 152 L24 70 M40 152 L56 68" stroke="#9bb47f" stroke-width="2" fill="none"/>
+          <g fill="${c}">
+            <circle cx="32" cy="56" r="4.5"/>
+            <circle cx="48" cy="50" r="4.5"/>
+            <circle cx="24" cy="70" r="4.2"/>
+            <circle cx="56" cy="68" r="4.2"/>
+            <circle cx="40" cy="38" r="4.8"/>
+            <circle cx="18" cy="84" r="4"/>
+            <circle cx="62" cy="82" r="4"/>
+          </g>
+        </svg>`
+    },
+    {
+      id: 'eucalyptus', name: 'Eucalyptus', size: 'filler', role: 'greenery',
+      colors: ['#8aa869'],
+      svg: (c) => `
+        <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+          <line x1="40" y1="152" x2="40" y2="16" stroke="#7c9a6c" stroke-width="2.5"/>
+          <g fill="${c}">
+            <ellipse cx="22" cy="35" rx="9" ry="6" transform="rotate(-30 22 35)"/>
+            <ellipse cx="58" cy="35" rx="9" ry="6" transform="rotate(30 58 35)"/>
+            <ellipse cx="18" cy="64" rx="9" ry="6" transform="rotate(-30 18 64)"/>
+            <ellipse cx="62" cy="64" rx="9" ry="6" transform="rotate(30 62 64)"/>
+            <ellipse cx="22" cy="93" rx="8.5" ry="5.5" transform="rotate(-30 22 93)"/>
+            <ellipse cx="58" cy="93" rx="8.5" ry="5.5" transform="rotate(30 58 93)"/>
+            <ellipse cx="28" cy="122" rx="8" ry="5" transform="rotate(-25 28 122)"/>
+            <ellipse cx="52" cy="122" rx="8" ry="5" transform="rotate(25 52 122)"/>
+          </g>
+        </svg>`
+    }
+  ];
+
+  function shade(hex, percent){
+    // lighten/darken a hex color by percent (-100..100)
+    let f = parseInt(hex.slice(1),16);
+    let t = percent < 0 ? 0 : 255;
+    let p = Math.abs(percent)/100;
+    let R = f>>16, G = (f>>8)&0x00FF, B = f&0x0000FF;
+    const r = Math.round((t-R)*p)+R;
+    const g = Math.round((t-G)*p)+G;
+    const b = Math.round((t-B)*p)+B;
+    return '#' + (0x1000000 + r*0x10000 + g*0x100 + b).toString(16).slice(1);
+  }
+
+  const COLOR_NAMES = {
+    red: 'Red', pink: 'Pink', white: 'White', peach: 'Peach',
+    yellow: 'Yellow', lavenderC: 'Lavender', blue: 'Blue'
+  };
+
+  /* ============================================================
+     STATE
+  ============================================================ */
+  let state = {
+    step: 1,
+    selectedColors: {},       // flowerId -> current swatch color key chosen in UI
+    placedFlowers: [],        // array of {flowerId, colorKey, uid, x, y, size, rotation, z} — manually placed in the vase
+    to: '',
+    from: '',
+    message: ''
+  };
+
+  const MAX_FLOWERS = 9;
+  let uidCounter = 0;
+
+  const root = document.getElementById('app');
+
+  function render(){
+    if(state.step === 1) renderStep1();
+    else if(state.step === 3) renderStep3();
+    else if(state.step === 4) renderStep4();
+  }
+
+  function stepTrackHTML(current){
+    // 3 visible stages now: 1 = design, 2 = dedication, 3 = reveal
+    const map = {1:1, 3:2, 4:3};
+    const activeIdx = map[current] || 1;
+    let dots = '';
+    for(let i=1;i<=3;i++){
+      let cls = i === activeIdx ? 'active' : (i < activeIdx ? 'done' : '');
+      dots += `<div class="step-dot ${cls}"></div>`;
+    }
+    return `<div class="step-track">${dots}</div>`;
+  }
+
+  /* ---------------- STEP 1: DRAG-AND-DROP DESIGNER ---------------- */
+  // placedFlowers: array of {flowerId, colorKey, uid, x, y, size, rotation, z}
+  // x,y are stored as pixel offsets relative to the drop-zone's center-bottom anchor point
+  let dragState = null; // {flowerId, colorKey, ghostEl, fromHandleEl}
+  let lastDropZoneWidth = 360; // tracked across renders so slot outlines align with the real drop-zone size
+
+  function renderStep1(){
+    FLOWER_TYPES.forEach(f => {
+      if(!state.selectedColors[f.id]) state.selectedColors[f.id] = f.colors[0];
+    });
+
+    const trayCards = FLOWER_TYPES.map(f => {
+      const chosenColor = state.selectedColors[f.id];
+      const hex = COLORS[chosenColor] || chosenColor;
+      const swatches = f.colors.map(ck => {
+        const chex = COLORS[ck] || ck;
+        const sel = ck === chosenColor ? 'selected' : '';
+        return `<button class="swatch ${sel}" style="background:${chex}" data-flower="${f.id}" data-color="${ck}" aria-label="${COLOR_NAMES[ck]||ck} ${f.name}" title="${COLOR_NAMES[ck]||ck}"></button>`;
+      }).join('');
+
+      return `
+        <div class="tray-flower-card">
+          <div class="drag-handle" data-handle="${f.id}" tabindex="0" role="button" aria-label="Drag ${f.name} into the vase">${f.svg(hex)}</div>
+          <div class="fname">${f.name}</div>
+          <div class="swatches">${swatches}</div>
+        </div>`;
+    }).join('');
+
+    const placedHTML = state.placedFlowers.map(placedFlowerDesignerHTML).join('');
+    const count = state.placedFlowers.length;
+    const dropZoneWidthEstimate = (lastDropZoneWidth || 360);
+    const outlinesHTML = allSlotOutlinesHTML(dropZoneWidthEstimate);
+
+    root.className = 'full-bleed';
+    root.innerHTML = `
+      <div class="designer">
+        <div class="designer-header">
+          <div class="eyebrow">Make something special</div>
+          <h1>Design Your Bouquet</h1>
+        </div>
+        <p class="designer-hint">Drag a flower from the tray below and drop it into the vase 🌸</p>
+
+        <div class="drop-zone" id="dropZone">
+          ${count === 0 ? `<div class="empty-vase-msg">Follow the dotted shapes — drag a flower into each one 🌸</div>` : ''}
+          ${outlinesHTML}
+          ${placedHTML}
+          ${vaseSVG()}
+        </div>
+
+        <div class="designer-footer">
+          <span class="placed-count">${count} flower${count===1?'':'s'} placed${count >= MAX_FLOWERS ? ' — vase is full 💐' : ''}</span>
+        </div>
+
+        <div class="flower-tray-bar">
+          <div class="tray-scroll" id="trayScroll">${trayCards}</div>
+          <div style="display:flex; justify-content:center; margin-top:8px;">
+            <button class="primary-btn" id="toStep3b" style="padding:10px 26px; font-size:14px;" ${count === 0 ? 'disabled' : ''}>Looks Lovely — Continue 💌</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // measure the real drop-zone width now that it's in the DOM, and re-render the
+    // outlines against the accurate width if our estimate was off (first render
+    // before layout, or after a resize) — keeps outlines perfectly aligned with
+    // where flowers will actually snap.
+    const dz = document.getElementById('dropZone');
+    if(dz){
+      const realWidth = dz.getBoundingClientRect().width;
+      if(realWidth > 0 && Math.abs(realWidth - dropZoneWidthEstimate) > 2){
+        lastDropZoneWidth = realWidth;
+        const fixedOutlines = allSlotOutlinesHTML(realWidth);
+        const outlineContainer = dz.querySelectorAll('.slot-outline');
+        outlineContainer.forEach(el => el.remove());
+        dz.insertAdjacentHTML('afterbegin', fixedOutlines);
+      }
+    }
+
+    wireDesignerDrag();
+
+    const nextBtn = document.getElementById('toStep3b');
+    if(nextBtn){
+      nextBtn.addEventListener('click', () => {
+        if(state.placedFlowers.length === 0) return;
+        snapshotArrangementForPreview();
+        state.step = 3;
+        render();
+      });
+    }
+  }
+
+  // Renders a soft dashed silhouette for every slot that doesn't yet have a flower
+  // in it, so the person sees the full intended bouquet shape before placing
+  // anything — a "connect the dots" feeling rather than a blank vase. Outlines use
+  // the same xOffset/yFromBottom/rotation as the real slot, so when a flower is
+  // dropped there it lands exactly where its outline was, with no visual jump.
+  function slotOutlineHTML(slot, idx, vaseCenterX){
+    const isFull = roleIsFull(slot.role);
+    const midSize = { focal: 62, accent: 48, filler: 42, greenery: 51 }[slot.role] || 50;
+    const left = vaseCenterX + slot.xOffset;
+    const bottom = slot.yFromBottom;
+    const dimClass = isFull ? ' slot-outline-dim' : '';
+    // shape differs slightly by role so the silhouette hints at what belongs there:
+    // round-ish blob for focal/accent (a flower head), a thin sliver for filler/greenery (a sprig)
+    const isSprig = slot.role === 'filler' || slot.role === 'greenery';
+    const shapeSvg = isSprig
+      ? `<svg viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="95" x2="20" y2="20" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 5" stroke-linecap="round"/><circle cx="20" cy="14" r="7" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 4"/></svg>`
+      : `<svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg"><line x1="40" y1="95" x2="40" y2="150" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 5" stroke-linecap="round"/><circle cx="40" cy="42" r="26" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5 5"/></svg>`;
+    return `<div class="slot-outline${dimClass}" data-slot-outline="${idx}" style="left:${left}px; bottom:${bottom}px; width:${midSize}px; height:${midSize*2}px; transform: translateX(-50%) rotate(${slot.rotation}deg);">${shapeSvg}</div>`;
+  }
+
+  function allSlotOutlinesHTML(dropZoneWidth){
+    const vaseCenterX = dropZoneWidth / 2;
+    return BOUQUET_SLOTS
+      .map((slot, idx) => occupiedSlots.has(idx) ? '' : slotOutlineHTML(slot, idx, vaseCenterX))
+      .join('');
+  }
+
+
+  // 200px wide with its rim opening spanning roughly the center 80px of that (about
+  // ±40px from center), and the rim's top edge sits at roughly 160px above the
+  // drop-zone floor. Every stem base sits at or just above that rim line — none
+  // float in a gap above the vase — and the whole cluster fans out only modestly
+  // as it rises, the way real stems gathered in a hand and lowered into a vase do
+  // (an hourglass: narrow at the rim, slightly wider at the flower heads, never
+  // wider than about 1.6x the rim itself).
+  const BOUQUET_SLOTS = [
+    // FOCAL — the hero blooms, closest to center, highest up, most upright.
+    { role: 'focal', xOffset: -34, yFromBottom: 168, rotation: -8,  z: 30 },
+    { role: 'focal', xOffset: 0,   yFromBottom: 182, rotation: 0,   z: 32 },
+    { role: 'focal', xOffset: 34,  yFromBottom: 168, rotation: 8,   z: 30 },
+    { role: 'focal', xOffset: -14, yFromBottom: 195, rotation: -3,  z: 34 },
+
+    // ACCENT — tucked just beside/behind the focals, slightly lower and outward.
+    { role: 'accent', xOffset: -52, yFromBottom: 158, rotation: -16, z: 24 },
+    { role: 'accent', xOffset: 52,  yFromBottom: 158, rotation: 16,  z: 24 },
+    { role: 'accent', xOffset: 16,  yFromBottom: 190, rotation: 5,   z: 33 },
+
+    // FILLER — small sprigs layered in the gaps between the bigger blooms, at
+    // roughly rim height so they read as part of the same gathered bunch.
+    { role: 'filler', xOffset: -22, yFromBottom: 162, rotation: -12, z: 18 },
+    { role: 'filler', xOffset: 22,  yFromBottom: 162, rotation: 12,  z: 18 },
+    { role: 'filler', xOffset: -44, yFromBottom: 175, rotation: -18, z: 35 },
+    { role: 'filler', xOffset: 44,  yFromBottom: 175, rotation: 18,  z: 35 },
+
+    // GREENERY — frames the back/sides right at the rim, just barely peeking past
+    // the focal flowers rather than sprawling far out to either side.
+    { role: 'greenery', xOffset: -58, yFromBottom: 150, rotation: -22, z: 8 },
+    { role: 'greenery', xOffset: 58,  yFromBottom: 150, rotation: 22,  z: 8 },
+    { role: 'greenery', xOffset: 0,   yFromBottom: 145, rotation: 0,   z: 7 }
+  ];
+
+  // hard cap per role so the bouquet always stays visually balanced — most importantly,
+  // focal flowers (the biggest) can never crowd each other out no matter how many the
+  // person tries to drag in.
+  const ROLE_LIMITS = { focal: 4, accent: 3, filler: 4, greenery: 3 };
+
+  function placedFlowerDesignerHTML(item){
+    const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
+    const hex = COLORS[item.colorKey] || item.colorKey;
+    const svgMarkup = f.svg(hex);
+    // anchor at the stem base (bottom-center of the SVG art), not the visual center,
+    // since each flower's stem reaches down to the bottom edge of its box.
+    return `<div class="placed-flower-d" data-uid="${item.uid}" style="left:${item.x}px; bottom:${item.bottomOffset}px; width:${item.size}px; height:${item.size*2}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">
+      ${svgMarkup}
+      <button class="del-x" data-del="${item.uid}" aria-label="Remove this flower" style="top:-8px;">✕</button>
+    </div>`;
+  }
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  function wireDesignerDrag(){
+    // delete buttons on already-placed flowers
+    root.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const uid = btn.getAttribute('data-del');
+        const flower = state.placedFlowers.find(p => p.uid === uid);
+        if(flower){
+          occupiedSlots.delete(flower.slotIndex);
+          if(flower.role && roleCounts[flower.role] > 0) roleCounts[flower.role]--;
+        }
+        state.placedFlowers = state.placedFlowers.filter(p => p.uid !== uid);
+        renderStep1();
+      });
+    });
+
+    // start drag from tray handles
+    root.querySelectorAll('.drag-handle').forEach(handle => {
+      handle.addEventListener('pointerdown', (e) => {
+        if(state.placedFlowers.length >= MAX_FLOWERS) return;
+        const flowerId = handle.getAttribute('data-handle');
+        const f = FLOWER_TYPES.find(fl => fl.id === flowerId);
+        if(roleIsFull(f.role)){
+          flashRoleFullMessage(f.role);
+          return;
+        }
+        e.preventDefault();
+        const colorKey = state.selectedColors[flowerId];
+        startDrag(flowerId, colorKey, e.clientX, e.clientY, handle);
+      });
+      // keyboard fallback: Enter/Space drops flower into the best open slot
+      handle.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          if(state.placedFlowers.length >= MAX_FLOWERS) return;
+          const flowerId = handle.getAttribute('data-handle');
+          const colorKey = state.selectedColors[flowerId];
+          dropFlowerAtCenter(flowerId, colorKey);
+        }
+      });
+    });
+
+    // swatch clicks inside tray
+    root.querySelectorAll('.swatch').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const flowerId = btn.getAttribute('data-flower');
+        const colorKey = btn.getAttribute('data-color');
+        state.selectedColors[flowerId] = colorKey;
+        renderStep1();
+      });
+    });
+  }
+
+  function sizeForRole(role){
+    if(role === 'greenery') return Math.round(rand(46,56));
+    if(role === 'filler') return Math.round(rand(38,46));
+    if(role === 'accent') return Math.round(rand(44,52));
+    return Math.round(rand(56,68)); // focal — the largest, most prominent
+  }
+
+  // tracks which slot indices currently have a flower, so two flowers never overlap
+  let occupiedSlots = new Set();
+  // tracks how many flowers of each role are currently placed, to enforce ROLE_LIMITS
+  let roleCounts = { focal: 0, accent: 0, filler: 0, greenery: 0 };
+
+  function roleIsFull(role){
+    return roleCounts[role] >= (ROLE_LIMITS[role] || 99);
+  }
+
+  // find the open slot — matching the dragged flower's OWN role — whose on-screen
+  // position is nearest to the pointer's drop point. Restricting to same-role slots
+  // is what prevents a small filler sprig from ever landing in a wide-spaced focal
+  // slot (or vice versa), keeping every role's spacing appropriate to its own size.
+  function findNearestOpenSlot(dropX, dropY, dropZoneRect, role){
+    const vaseCenterX = dropZoneRect.width / 2; // vase is always horizontally centered in the drop zone
+    let best = null, bestDist = Infinity;
+    BOUQUET_SLOTS.forEach((slot, idx) => {
+      if(slot.role !== role) return;
+      if(occupiedSlots.has(idx)) return;
+      const slotX = vaseCenterX + slot.xOffset;
+      const slotY = dropZoneRect.height - slot.yFromBottom;
+      const dist = Math.hypot(dropX - slotX, dropY - slotY);
+      if(dist < bestDist){
+        bestDist = dist;
+        best = idx;
+      }
+    });
+    return best;
+  }
+
+  function placeFlowerInSlot(flowerId, colorKey, slotIndex, dropZoneRect){
+    const f = FLOWER_TYPES.find(x => x.id === flowerId);
+    const slot = BOUQUET_SLOTS[slotIndex];
+    const size = sizeForRole(f.role);
+    const vaseCenterX = dropZoneRect.width / 2;
+    occupiedSlots.add(slotIndex);
+    roleCounts[f.role] = (roleCounts[f.role] || 0) + 1;
+    uidCounter++;
+    state.placedFlowers.push({
+      flowerId, colorKey, uid: 'p'+uidCounter,
+      slotIndex, role: f.role,
+      x: Math.round(vaseCenterX + slot.xOffset),
+      bottomOffset: slot.yFromBottom, // CSS `bottom` anchors the box's bottom edge here; the SVG's height extends upward from this point automatically, so no subtraction is needed
+      size,
+      rotation: slot.rotation,
+      z: slot.z
+    });
+  }
+
+  function dropFlowerAtCenter(flowerId, colorKey){
+    const f = FLOWER_TYPES.find(x => x.id === flowerId);
+    if(roleIsFull(f.role)){
+      flashRoleFullMessage(f.role);
+      return;
+    }
+    const dropZone = document.getElementById('dropZone');
+    const rect = dropZone.getBoundingClientRect();
+    if(rect.width > 0) lastDropZoneWidth = rect.width;
+    const slotIndex = findNearestOpenSlot(rect.width/2, rect.height - 200, rect, f.role);
+    if(slotIndex === null) return; // no open slot left for this role (shouldn't normally happen)
+    placeFlowerInSlot(flowerId, colorKey, slotIndex, rect);
+    renderStep1();
+  }
+
+  // brief, friendly inline message when a role's slots are already full —
+  // appears in place of the hint text for a moment rather than a harsh alert.
+  function flashRoleFullMessage(role){
+    const hint = document.querySelector('.designer-hint');
+    if(!hint) return;
+    const label = role === 'focal' ? 'main flowers' : role === 'greenery' ? 'greenery' : role;
+    const original = hint.textContent;
+    hint.textContent = `That's plenty of ${label} for one bouquet 🌷 — try a different type!`;
+    hint.style.color = 'var(--blush-deep)';
+    setTimeout(() => {
+      if(hint){ hint.textContent = original; hint.style.color = ''; }
+    }, 1800);
+  }
+
+  function startDrag(flowerId, colorKey, startX, startY, handleEl){
+    const f = FLOWER_TYPES.find(x => x.id === flowerId);
+    const hex = COLORS[colorKey] || colorKey;
+    const size = sizeForRole(f.role);
+
+    const ghost = document.createElement('div');
+    ghost.className = 'drag-ghost';
+    ghost.style.width = size + 'px';
+    ghost.style.height = (size*2) + 'px';
+    ghost.style.left = startX + 'px';
+    ghost.style.top = startY + 'px';
+    ghost.innerHTML = f.svg(hex);
+    document.body.appendChild(ghost);
+    document.body.classList.add('dragging-flower');
+    handleEl.classList.add('lifting');
+
+    dragState = { flowerId, colorKey, size, ghostEl: ghost, handleEl };
+
+    function onMove(e){
+      if(!dragState) return;
+      const x = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+      const y = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
+      if(x === undefined) return;
+      dragState.ghostEl.style.left = x + 'px';
+      dragState.ghostEl.style.top = y + 'px';
+
+      const dropZone = document.getElementById('dropZone');
+      if(dropZone){
+        const rect = dropZone.getBoundingClientRect();
+        const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+        dropZone.classList.toggle('drag-over', inside);
+      }
+    }
+
+    function onUp(e){
+      if(!dragState) return cleanup();
+      const x = e.clientX !== undefined ? e.clientX : (e.changedTouches && e.changedTouches[0].clientX);
+      const y = e.clientY !== undefined ? e.clientY : (e.changedTouches && e.changedTouches[0].clientY);
+
+      const dropZone = document.getElementById('dropZone');
+      if(dropZone && x !== undefined && y !== undefined){
+        const rect = dropZone.getBoundingClientRect();
+        if(rect.width > 0) lastDropZoneWidth = rect.width;
+        const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+        const f = FLOWER_TYPES.find(fl => fl.id === dragState.flowerId);
+        if(inside && state.placedFlowers.length < MAX_FLOWERS && !roleIsFull(f.role)){
+          const slotIndex = findNearestOpenSlot(x - rect.left, y - rect.top, rect, f.role);
+          if(slotIndex !== null){
+            placeFlowerInSlot(dragState.flowerId, dragState.colorKey, slotIndex, rect);
+          }
+        }
+      }
+      cleanup();
+      renderStep1();
+    }
+
+    function cleanup(){
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      document.removeEventListener('pointercancel', onUp);
+      if(dragState && dragState.ghostEl && dragState.ghostEl.parentNode){
+        dragState.ghostEl.parentNode.removeChild(dragState.ghostEl);
+      }
+      document.body.classList.remove('dragging-flower');
+      dragState = null;
+    }
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  }
+
+  /* ---------------- STATIC VASE PREVIEW (used in steps 3 & 4) ---------------- */
+  function vaseSVG(){
+    return `
+    <svg class="vase-base" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+      <path d="M70 20 C70 10 150 10 150 20 L160 70 C175 90 180 130 165 160 C150 185 70 185 55 160 C40 130 45 90 60 70 Z"
+        fill="var(--lavender)" stroke="${shade('#e3d6f0',-15)}" stroke-width="2"/>
+      <ellipse cx="110" cy="22" rx="40" ry="8" fill="${shade('#e3d6f0',-8)}" opacity="0.6"/>
+      <path d="M70 20 C70 10 150 10 150 20" fill="none" stroke="${shade('#e3d6f0',-20)}" stroke-width="2"/>
+      <ellipse cx="90" cy="60" rx="10" ry="22" fill="#ffffff" opacity="0.25"/>
+    </svg>`;
+  }
+
+  // Renders a placed flower at a normalized position for the read-only preview stage
+  // (steps 3 & 4), scaling the original drop-zone coordinates into a fixed-size stage.
+  // Anchored at the stem base (left+bottom), matching how flowers are positioned live
+  // in the designer, so the bouquet looks identical here as it did when she built it.
+  function previewFlowerHTML(item, stageWidth, stageHeight){
+    const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
+    const hex = COLORS[item.colorKey] || item.colorKey;
+    const svgMarkup = f.svg(hex);
+    const left = `${Math.round(item.normX * stageWidth)}px`;
+    const bottom = `${Math.round(item.normBottom * stageHeight)}px`;
+    return `<div class="placed-flower" style="left:${left}; bottom:${bottom}; width:${item.size}px; height:${item.size*2}px; transform: translateX(-50%) rotate(${item.rotation}deg); z-index:${item.z};">${svgMarkup}</div>`;
+  }
+
+  function ribbonSVG(){
+    return `
+    <svg viewBox="0 0 100 40" style="position:absolute; left:50%; transform:translateX(-50%); bottom:150px; width:90px; z-index:25;" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 10 L50 22 L20 32 Z" fill="var(--gold)"/>
+      <path d="M80 10 L50 22 L80 32 Z" fill="var(--gold)"/>
+      <circle cx="50" cy="20" r="8" fill="${shade('#e3b97f',-10)}"/>
+    </svg>`;
+  }
+
+  // captures the current drop-zone's flower positions as normalized (0-1) coordinates
+  // so the same arrangement can be redrawn at a different size in steps 3 & 4
+  function snapshotArrangementForPreview(){
+    const dropZone = document.getElementById('dropZone');
+    let w = 320, h = 380;
+    if(dropZone){
+      const rect = dropZone.getBoundingClientRect();
+      if(rect.width > 0) w = rect.width;
+      if(rect.height > 0) h = rect.height;
+    }
+    state.previewArrangement = state.placedFlowers.map(item => ({
+      ...item,
+      normX: item.x / w,
+      normBottom: item.bottomOffset / h
+    }));
+  }
+
+  /* ---------------- STEP 3: DEDICATION ---------------- */
+  function renderStep3(){
+    const maxChars = 300;
+    root.className = '';
+    root.innerHTML = `
+      <div class="screen">
+        <div class="app-header">
+          <div class="eyebrow">Almost there</div>
+          <h1>Write a Dedication</h1>
+        </div>
+        ${stepTrackHTML(3)}
+        <p class="intro-text">Add a little note to go with your bouquet.</p>
+
+        <div class="note-card">
+          <label class="field-label" for="toInput">To</label>
+          <input class="field-input" id="toInput" type="text" placeholder="Who is this for?" maxlength="40" value="${escapeHTML(state.to)}" />
+
+          <label class="field-label" for="fromInput">From</label>
+          <input class="field-input" id="fromInput" type="text" placeholder="Who's it from?" maxlength="40" value="${escapeHTML(state.from)}" />
+
+          <label class="field-label" for="msgInput">Your message</label>
+          <textarea class="field-textarea" id="msgInput" placeholder="Write something from the heart..." maxlength="${maxChars}">${escapeHTML(state.message)}</textarea>
+          <div class="char-count"><span id="charCount">${state.message.length}</span> / ${maxChars}</div>
+        </div>
+
+        <button class="primary-btn" id="toStep4" style="margin-top:6px;">Reveal My Bouquet 🌷</button>
+        <div style="text-align:center; margin-top:10px;">
+          <button class="ghost-btn" id="backTo1from3">← Back to designing</button>
+        </div>
+      </div>
+    `;
+
+    const toInput = document.getElementById('toInput');
+    const fromInput = document.getElementById('fromInput');
+    const msgInput = document.getElementById('msgInput');
+    const charCount = document.getElementById('charCount');
+
+    toInput.addEventListener('input', () => state.to = toInput.value);
+    fromInput.addEventListener('input', () => state.from = fromInput.value);
+    msgInput.addEventListener('input', () => {
+      state.message = msgInput.value;
+      charCount.textContent = msgInput.value.length;
+    });
+
+    document.getElementById('toStep4').addEventListener('click', () => { state.step = 4; render(); });
+    document.getElementById('backTo1from3').addEventListener('click', () => { state.step = 1; render(); });
+  }
+
+  function escapeHTML(str){
+    return (str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  /* ---------------- STEP 4: REVEAL ---------------- */
+  function renderStep4(){
+    const STAGE_W = 420, STAGE_H = 420;
+    const arrangement = state.previewArrangement && state.previewArrangement.length
+      ? state.previewArrangement
+      : state.placedFlowers.map(item => ({...item, normX: 0.5, normY: 0.6}));
+    const flowersHTML = arrangement.map(item => previewFlowerHTML(item, STAGE_W, STAGE_H)).join('');
+
+    const petalColors = ['#f0a8c0','#f7dce0','#eab8c2','#e3d6f0'];
+    let petals = '';
+    for(let i=0;i<14;i++){
+      const left = rand(2,96).toFixed(1);
+      const dur = rand(9,16).toFixed(1);
+      const delay = rand(0,10).toFixed(1);
+      const drift = rand(-60,60).toFixed(0);
+      const size = rand(8,16).toFixed(0);
+      const color = petalColors[i % petalColors.length];
+      petals += `<div class="petal" style="left:${left}%; width:${size}px; height:${size}px; background:${color}; border-radius: 0 50% 50% 50%; animation-duration:${dur}s; animation-delay:${delay}s; --drift:${drift}px;"></div>`;
+    }
+
+    const sparkles = [
+      {top:'18%', left:'30%', delay:'0s'},
+      {top:'25%', left:'68%', delay:'.8s'},
+      {top:'40%', left:'20%', delay:'1.6s'},
+      {top:'15%', left:'52%', delay:'2.2s'}
+    ].map(s => `<div class="sparkle" style="top:${s.top}; left:${s.left}; animation-delay:${s.delay};">✨</div>`).join('');
+
+    const toName = state.to.trim() || 'You';
+    const fromName = state.from.trim() || 'Someone who cares';
+    const message = state.message.trim() || 'A little bouquet, made just for you.';
+
+    root.className = '';
+    root.innerHTML = `
+      <div class="petal-field">${petals}</div>
+      <div class="reveal-screen">
+        <div class="reveal-vase-wrap">
+          <div class="vase-stage" style="position:relative;">
+            ${sparkles}
+            ${ribbonSVG()}
+            ${flowersHTML}
+            ${vaseSVG()}
+          </div>
+        </div>
+
+        <div class="reveal-note">
+          <div class="reveal-to">For ${escapeHTML(toName)}</div>
+          <div class="reveal-message">${escapeHTML(message)}</div>
+          <div class="reveal-from">With love, <span>${escapeHTML(fromName)}</span></div>
+        </div>
+
+        <div class="restart-wrap">
+          <button class="secondary-btn" id="restartBtn">Make Another Bouquet 💐</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      state = { step:1, selectedColors:{}, placedFlowers:[], previewArrangement:[], to:'', from:'', message:'' };
+      occupiedSlots = new Set();
+      roleCounts = { focal: 0, accent: 0, filler: 0, greenery: 0 };
+      render();
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
