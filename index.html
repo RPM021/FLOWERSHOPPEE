@@ -1097,22 +1097,31 @@
   }
 
   function getPlacementForFlower(index, dropZoneRect){
+    const slots = [
+      { xOffset: -52, bottomOffset: 136, rotation: -18 },
+      { xOffset:  52, bottomOffset: 136, rotation:  18 },
+      { xOffset: -28, bottomOffset: 150, rotation: -8 },
+      { xOffset:  28, bottomOffset: 150, rotation:  8 },
+      { xOffset:   0, bottomOffset: 166, rotation:  0 },
+      { xOffset: -68, bottomOffset: 122, rotation: -24 },
+      { xOffset:  68, bottomOffset: 122, rotation:  24 },
+      { xOffset: -38, bottomOffset: 110, rotation: -10 },
+      { xOffset:  38, bottomOffset: 110, rotation:  10 }
+    ];
     const vase = getSelectedVase();
     const vaseSvgWidth = 220;
     const vaseSvgHeight = 200;
     const vaseRenderHeight = 200 * vaseSvgHeight / vaseSvgWidth;
     const openingX = dropZoneRect.width / 2 + vase.openingPoint.x;
     const openingY = vaseRenderHeight - vase.openingPoint.y * (vaseRenderHeight / vaseSvgHeight);
-    const spread = 10 + Math.min(24, index * 7);
-    const angle = (-0.24 + index * 0.06) + ((index % 2) ? 0.04 : -0.04);
-    const x = openingX + Math.cos(angle) * spread;
-    const bottomOffset = openingY - 10 - index * 5;
-    const rotation = (-8 + index * 2) + ((index % 2) ? 4 : -4);
+    const slot = slots[index] || { xOffset: 0, bottomOffset: 158, rotation: 0 };
+    const x = openingX + slot.xOffset;
+    const bottomOffset = openingY - slot.bottomOffset;
     const scale = PLACED_FLOWER_HEIGHT / 160;
     return {
       x: Math.round(x),
       bottomOffset: Math.round(bottomOffset),
-      rotation: Math.round(rotation),
+      rotation: slot.rotation,
       width: Math.round(80 * scale),
       height: PLACED_FLOWER_HEIGHT,
       stemZ: 2 + index,
