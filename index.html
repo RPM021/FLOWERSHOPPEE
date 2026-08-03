@@ -1,679 +1,878 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>A Little Bouquet</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Little Bouquet</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap');
 
-  :root{
-    --cream: #fdf8f3;
-    --blush: #f7dce0;
-    --blush-deep: #eab8c2;
-    --lavender: #e3d6f0;
-    --sage: #b9c9a9;
-    --sage-deep: #94a87f;
-    --ink: #5b4a4f;
-    --ink-soft: #8a7a7e;
-    --gold: #e3b97f;
-    --white: #fffaf6;
-  }
+    :root {
+      --cream: #fdf8f3;
+      --blush: #f7dce0;
+      --blush-deep: #eab8c2;
+      --lavender: #e3d6f0;
+      --sage: #b9c9a9;
+      --sage-deep: #94a87f;
+      --ink: #5b4a4f;
+      --ink-soft: #8a7a7e;
+      --gold: #e3b97f;
+      --white: #fffaf6;
+    }
 
-  *{ box-sizing: border-box; }
-  html,body{
-    margin:0; padding:0; width:100%; min-height:100vh;
-    font-family:'Quicksand', sans-serif;
-    color: var(--ink);
-    background: linear-gradient(160deg, var(--cream) 0%, #f9eee8 50%, var(--blush) 100%);
-    overflow-x:hidden;
-  }
+    * {
+      box-sizing: border-box;
+    }
 
-  button{ font-family:inherit; cursor:pointer; }
-  button:focus-visible, .swatch:focus-visible, .flower-card:focus-visible {
-    outline: 3px solid var(--sage-deep);
-    outline-offset: 2px;
-  }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      font-family: 'Quicksand', sans-serif;
+      color: var(--ink);
+      background: linear-gradient(160deg, var(--cream) 0%, #f9eee8 50%, var(--blush) 100%);
+      overflow-x: hidden;
+    }
 
-  @media (prefers-reduced-motion: reduce){
-    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-  }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
 
-  .app{
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 28px 20px 60px;
-    min-height: 100vh;
-  }
-  .app.full-bleed{
-    max-width: none;
-    padding: 0;
-    min-height: 100vh;
-  }
+    button:focus-visible,
+    .swatch:focus-visible,
+    .flower-card:focus-visible {
+      outline: 3px solid var(--sage-deep);
+      outline-offset: 2px;
+    }
 
-  /* ---------- Header ---------- */
-  .app-header{
-    text-align:center;
-    margin-bottom: 18px;
-  }
-  .app-header .eyebrow{
-    font-size: 13px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--sage-deep);
-    font-weight:600;
-  }
-  .app-header h1{
-    font-family:'Caveat', cursive;
-    font-size: 52px;
-    margin: 4px 0 0;
-    color: var(--ink);
-    font-weight:700;
-  }
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
-  .step-track{
-    display:flex;
-    justify-content:center;
-    gap: 10px;
-    margin: 18px 0 6px;
-  }
-  .step-dot{
-    width:9px; height:9px; border-radius:50%;
-    background: #e7d9d2;
-    transition: background .3s ease, transform .3s ease;
-  }
-  .step-dot.active{ background: var(--blush-deep); transform: scale(1.3); }
-  .step-dot.done{ background: var(--sage-deep); }
+    .app {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+      min-height: 100vh;
+    }
 
-  .screen{
-    animation: fadeSlideIn .5s ease both;
-  }
-  @keyframes fadeSlideIn{
-    from{ opacity:0; transform: translateY(14px); }
-    to{ opacity:1; transform: translateY(0); }
-  }
+    .app.full-bleed {
+      max-width: none;
+      padding: 0;
+      min-height: 100vh;
+    }
 
-  /* ---------- Step 1: Drag-and-drop designer ---------- */
-  .intro-text{
-    text-align:center;
-    color: var(--ink-soft);
-    max-width: 480px;
-    margin: 0 auto 14px;
-    font-size: 14.5px;
-    line-height:1.5;
-  }
+    /* ---------- Header ---------- */
+    .app-header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
 
-  .designer{
-    position: fixed;
-    top: 0; left:0; right:0; bottom:0;
-    display:flex;
-    flex-direction:column;
-    background: linear-gradient(160deg, var(--cream) 0%, #f9eee8 50%, var(--blush) 100%);
-  }
-  .designer-header{
-    text-align:center;
-    padding: 14px 16px 6px;
-    flex-shrink:0;
-  }
-  .designer-header h1{
-    font-family:'Caveat', cursive;
-    font-size: 34px;
-    margin: 2px 0 0;
-    color: var(--ink);
-  }
-  .designer-header .eyebrow{
-    font-size: 11.5px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--sage-deep);
-    font-weight:700;
-  }
-  .designer-hint{
-    text-align:center;
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    padding: 0 16px 8px;
-    flex-shrink:0;
-  }
+    .app-header .eyebrow {
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sage-deep);
+      font-weight: 600;
+    }
 
-  /* drop zone (vase area) fills remaining space */
-  .drop-zone{
-    flex: 1 1 auto;
-    position: relative;
-    overflow: hidden;
-    touch-action: none;
-    min-height: 380px;
-  }
-  .drop-zone.drag-over::before{
-    content:"";
-    position:absolute;
-    inset: 8px;
-    border: 2px dashed var(--blush-deep);
-    border-radius: 24px;
-    pointer-events:none;
-    opacity:.6;
-  }
-  .drop-zone .vase-base{
-    position:absolute;
-    bottom: 0; left:50%;
-    transform: translateX(-50%);
-    width: 200px;
-    z-index: 1;
-    pointer-events:none;
-  }
-  .drop-zone .vase-base .vase-layer,
-  .vase-stage .vase-base .vase-layer{
-    pointer-events:none;
-  }
-  .drop-zone .vase-base .vase-back-layer,
-  .vase-stage .vase-base .vase-back-layer{
-    z-index: 1;
-  }
-  .drop-zone .vase-base .vase-front-layer,
-  .vase-stage .vase-base .vase-front-layer{
-    z-index: 3;
-  }
-  .empty-vase-msg{
-    position:absolute;
-    top: 16px; left:0; right:0;
-    text-align:center;
-    color: var(--ink-soft);
-    font-size: 13px;
-    font-style: italic;
-    pointer-events:none;
-    z-index: 50;
-  }
+    .app-header h1 {
+      font-family: 'Caveat', cursive;
+      font-size: 52px;
+      margin: 4px 0 0;
+      color: var(--ink);
+      font-weight: 700;
+    }
 
-  .placed-flower-d{
-    position:absolute;
-    transform-origin: bottom center;
-    transition: left .4s cubic-bezier(.34,1.3,.64,1), bottom .4s cubic-bezier(.34,1.3,.64,1), transform .4s cubic-bezier(.34,1.3,.64,1);
-  }
-  .placed-flower-d.stem-layer{ z-index: 2; }
-  .placed-flower-d.head-layer{ z-index: 4; }
-  .placed-flower-d svg{
-    width: 100%; height:100%; display:block;
-    filter: drop-shadow(0 3px 4px rgba(120,90,90,0.18));
-    pointer-events:none;
-  }
-  .placed-flower-d .flower-stem-layer,
-  .placed-flower-d .flower-head-layer,
-  .placed-flower .flower-stem-layer,
-  .placed-flower .flower-head-layer{
-    position:absolute; inset:0; width:100%; height:100%; pointer-events:none;
-  }
-  .placed-flower-d .flower-stem-layer svg,
-  .placed-flower .flower-stem-layer svg{
-    clip-path: inset(50% 0 0 0);
-  }
-  .placed-flower-d .flower-head-layer svg,
-  .placed-flower .flower-head-layer svg{
-    clip-path: inset(0 0 50% 0);
-  }
-  .placed-flower-d .del-x{
-    position:absolute;
-    top:-6px; right:-6px;
-    width: 20px; height:20px;
-    background: var(--white);
-    border-radius:50%;
-    border: none;
-    font-size: 11px;
-    line-height:20px;
-    text-align:center;
-    color: var(--ink-soft);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    opacity: 0;
-    transition: opacity .15s ease;
-    z-index: 60;
-  }
-  .placed-flower-d:hover .del-x,
-  .placed-flower-d.recent .del-x{ opacity: 1; }
+    .step-track {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 18px 0 6px;
+    }
 
-  /* bottom flower tray, horizontally scrollable */
-  .flower-tray-bar{
-    flex-shrink:0;
-    background: var(--white);
-    border-top: 1px solid rgba(190,150,150,0.18);
-    box-shadow: 0 -6px 18px rgba(190,150,150,0.12);
-    padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
-  }
-  .tray-scroll{
-    display:flex;
-    gap: 12px;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: 4px 14px 6px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-  }
-  .tray-scroll::-webkit-scrollbar{ height: 5px; }
-  .tray-scroll::-webkit-scrollbar-thumb{ background: var(--blush-deep); border-radius:4px; }
+    .step-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #e7d9d2;
+      transition: background .3s ease, transform .3s ease;
+    }
 
-  .tray-flower-card{
-    flex: 0 0 auto;
-    width: 78px;
-    text-align:center;
-    user-select:none;
-  }
-  .tray-flower-card .drag-handle{
-    width: 64px; height:64px;
-    margin: 0 auto;
-    background: var(--cream);
-    border-radius: 16px;
-    display:flex; align-items:center; justify-content:center;
-    cursor: grab;
-    touch-action: none;
-    transition: transform .15s ease, box-shadow .15s ease;
-    box-shadow: 0 2px 8px rgba(190,150,150,0.15);
-  }
-  .tray-flower-card .drag-handle:active{ cursor: grabbing; }
-  .tray-flower-card .drag-handle.lifting{
-    transform: scale(1.08);
-    box-shadow: 0 6px 16px rgba(190,150,150,0.3);
-  }
-  .tray-flower-card .drag-handle svg{ width: 46px; height:46px; pointer-events:none; }
-  .tray-flower-card .fname{
-    font-size: 11px;
-    font-weight:600;
-    margin: 5px 0 4px;
-    white-space: nowrap;
-  }
-  .tray-flower-card .swatches{
-    display:flex;
-    justify-content:center;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-  .tray-flower-card .swatch{
-    width: 14px; height:14px;
-  }
-  .vase-picker-wrap{
-    padding: 0 14px 10px;
-  }
-  .vase-picker{
-    display:flex;
-    justify-content:center;
-    gap: 8px;
-    flex-wrap:wrap;
-  }
-  .vase-option{
-    border: 1px solid rgba(190,150,150,0.25);
-    background: var(--cream);
-    color: var(--ink);
-    font-size: 12px;
-    font-weight:700;
-    padding: 7px 10px;
-    border-radius: 999px;
-    transition: background .2s ease, transform .15s ease, border-color .2s ease;
-  }
-  .vase-option:hover{ background: var(--blush); transform: translateY(-1px); }
-  .vase-option.selected{
-    background: linear-gradient(135deg, var(--blush-deep), var(--gold));
-    color: var(--white);
-    border-color: transparent;
-  }
+    .step-dot.active {
+      background: var(--blush-deep);
+      transform: scale(1.3);
+    }
 
-  /* the floating ghost element that follows the pointer while dragging */
-  .drag-ghost{
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.92;
-    transform: translate(-50%, -50%) scale(1.1);
-    filter: drop-shadow(0 6px 10px rgba(120,90,90,0.3));
-  }
-  .drag-ghost svg{ width: 100%; height:100%; }
+    .step-dot.done {
+      background: var(--sage-deep);
+    }
 
-  body.dragging-flower{
-    cursor: grabbing;
-  }
-  body.dragging-flower .tray-scroll{
-    overflow-x: hidden;
-  }
+    .screen {
+      animation: fadeSlideIn .5s ease both;
+    }
 
-  .designer-footer{
-    flex-shrink:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap: 12px;
-    padding: 8px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-    background: var(--white);
-    border-top: 1px solid rgba(190,150,150,0.1);
-  }
-  .placed-count{
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    font-weight:600;
-  }
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
 
-  .primary-btn{
-    display:block;
-    margin: 0 auto;
-    background: linear-gradient(135deg, var(--blush-deep), var(--gold));
-    color: var(--white);
-    border:none;
-    padding: 13px 34px;
-    border-radius: 999px;
-    font-size: 15.5px;
-    font-weight:700;
-    box-shadow: 0 6px 16px rgba(220,160,150,0.35);
-    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
-  }
-  .primary-btn:hover:not(:disabled){ transform: translateY(-2px); box-shadow: 0 9px 20px rgba(220,160,150,0.45); }
-  .primary-btn:active:not(:disabled){ transform: translateY(0) scale(0.97); }
-  .primary-btn:disabled{
-    opacity: 0.4;
-    cursor:not-allowed;
-    box-shadow:none;
-  }
-  .hint-text{
-    text-align:center;
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    margin-top: 8px;
-  }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-  .secondary-btn{
-    background: var(--white);
-    border: 2px solid var(--blush-deep);
-    color: var(--ink);
-    padding: 10px 22px;
-    border-radius: 999px;
-    font-weight:700;
-    font-size: 14px;
-    transition: background .2s ease, transform .15s ease;
-  }
-  .secondary-btn:hover{ background: var(--blush); transform: translateY(-1px); }
-  .secondary-btn:active{ transform: translateY(0) scale(0.96); }
+    /* ---------- Step 1: Drag-and-drop designer ---------- */
+    .intro-text {
+      text-align: center;
+      color: var(--ink-soft);
+      max-width: 480px;
+      margin: 0 auto 14px;
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
 
-  .ghost-btn{
-    background:none;
-    border:none;
-    color: var(--ink-soft);
-    font-size: 13.5px;
-    font-weight:600;
-    text-decoration: underline;
-    padding: 6px;
-  }
-  .ghost-btn:hover{ color: var(--ink); }
+    .designer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(160deg, var(--cream) 0%, #f9eee8 50%, var(--blush) 100%);
+    }
 
-  /* ---------- Step 2: Vase scene ---------- */
-  .vase-stage{
-    position: relative;
-    width: 100%;
-    max-width: 420px;
-    height: 420px;
-    margin: 0 auto 10px;
-  }
-  .vase-stage svg.vase-base{
-    position:absolute;
-    bottom: 0; left:50%;
-    transform: translateX(-50%);
-    width: 220px;
-    z-index: 1;
-  }
-  .flower-layer{
-    position:absolute;
-    bottom: 150px;
-    left:50%;
-    width:1px; height:1px;
-  }
-  .placed-flower{
-    position:absolute;
-    transform-origin: bottom center;
-    transition: left .55s cubic-bezier(.34,1.3,.64,1), bottom .55s cubic-bezier(.34,1.3,.64,1), transform .55s cubic-bezier(.34,1.3,.64,1);
-  }
-  .placed-flower.stem-layer{ z-index:2; }
-  .placed-flower.head-layer{ z-index:4; }
-  .placed-flower svg{
-    width: 100%; height:100%; display:block;
-    filter: drop-shadow(0 3px 4px rgba(120,90,90,0.18));
-  }
+    .designer-header {
+      text-align: center;
+      padding: 14px 16px 6px;
+      flex-shrink: 0;
+    }
 
-  .step2-actions{
-    display:flex;
-    justify-content:center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin: 14px 0 6px;
-  }
+    .designer-header h1 {
+      font-family: 'Caveat', cursive;
+      font-size: 34px;
+      margin: 2px 0 0;
+      color: var(--ink);
+    }
 
-  /* ---------- Step 3: Dedication card ---------- */
-  .note-card{
-    background: var(--white);
-    max-width: 440px;
-    margin: 0 auto;
-    border-radius: 18px;
-    padding: 26px 26px 22px;
-    box-shadow: 0 10px 26px rgba(190,150,150,0.18);
-    position: relative;
-  }
-  .note-card::before{
-    content:"";
-    position:absolute;
-    top:0; left: 18px; right: 18px;
-    height: 6px;
-    background: repeating-linear-gradient(90deg, var(--blush-deep) 0 14px, transparent 14px 22px);
-    border-radius: 0 0 6px 6px;
-    opacity: .55;
-  }
-  .field-label{
-    font-size: 12.5px;
-    font-weight:700;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing:.05em;
-    margin-bottom: 5px;
-    display:block;
-  }
-  .field-input, .field-textarea{
-    width:100%;
-    border: 2px solid var(--blush);
-    border-radius: 12px;
-    padding: 10px 12px;
-    font-family:'Quicksand', sans-serif;
-    font-size: 14.5px;
-    color: var(--ink);
-    margin-bottom: 16px;
-    transition: border-color .2s ease;
-    background: var(--cream);
-  }
-  .field-input:focus, .field-textarea:focus{
-    outline:none;
-    border-color: var(--blush-deep);
-  }
-  .field-textarea{
-    min-height: 100px;
-    resize: vertical;
-    font-family: 'Caveat', cursive;
-    font-size: 20px;
-    line-height: 1.4;
-  }
-  .char-count{
-    font-size: 11.5px;
-    color: var(--ink-soft);
-    text-align:right;
-    margin: -12px 0 14px;
-  }
+    .designer-header .eyebrow {
+      font-size: 11.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sage-deep);
+      font-weight: 700;
+    }
 
-  /* ---------- Step 4: Reveal ---------- */
-  .reveal-screen{
-    min-height: 80vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    position: relative;
-    text-align:center;
-    padding: 20px 0;
-  }
-  .petal-field{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    overflow:hidden;
-    z-index:0;
-  }
-  .petal{
-    position:absolute;
-    top: -5%;
-    opacity: 0;
-    animation: petalFall linear infinite;
-  }
-  @keyframes petalFall{
-    0%{ opacity:0; transform: translateY(0) translateX(0) rotate(0deg); }
-    8%{ opacity:.75; }
-    90%{ opacity:.6; }
-    100%{ opacity:0; transform: translateY(110vh) translateX(var(--drift)) rotate(340deg); }
-  }
+    .designer-hint {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      padding: 0 16px 8px;
+      flex-shrink: 0;
+    }
 
-  .reveal-vase-wrap{
-    opacity:0;
-    transform: scale(.85);
-    animation: revealPop .8s ease forwards;
-    animation-delay: .1s;
-    position:relative;
-    z-index:2;
-  }
-  @keyframes revealPop{
-    to{ opacity:1; transform: scale(1); }
-  }
+    /* drop zone (vase area) fills remaining space */
+    .drop-zone {
+      flex: 1 1 auto;
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+      min-height: 380px;
+    }
 
-  .reveal-note{
-    opacity:0;
-    transform: translateY(16px);
-    animation: revealSlide .7s ease forwards;
-    animation-delay: 1.0s;
-    max-width: 460px;
-    margin: 18px auto 0;
-    background: rgba(255,250,246,0.9);
-    backdrop-filter: blur(2px);
-    border-radius: 18px;
-    padding: 22px 28px;
-    box-shadow: 0 10px 30px rgba(190,150,150,0.2);
-    position:relative;
-    z-index:2;
-  }
-  @keyframes revealSlide{
-    to{ opacity:1; transform: translateY(0); }
-  }
-  .reveal-to{
-    font-size: 13px;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing:.08em;
-    font-weight:700;
-    margin-bottom: 6px;
-  }
-  .reveal-message{
-    font-family:'Caveat', cursive;
-    font-size: 26px;
-    line-height: 1.35;
-    color: var(--ink);
-    margin: 6px 0 14px;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .reveal-from{
-    font-size: 14.5px;
-    color: var(--ink-soft);
-    font-weight: 600;
-  }
-  .reveal-from span{
-    font-family:'Caveat', cursive;
-    font-size: 20px;
-    color: var(--ink);
-  }
+    .drop-zone.drag-over::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 2px dashed var(--blush-deep);
+      border-radius: 24px;
+      pointer-events: none;
+      opacity: .6;
+    }
 
-  .sparkle{
-    position:absolute;
-    font-size: 16px;
-    opacity:0;
-    animation: twinkle 2.4s ease-in-out infinite;
-    z-index:1;
-    pointer-events:none;
-  }
-  @keyframes twinkle{
-    0%, 100%{ opacity:0; transform: scale(.6) rotate(0deg); }
-    50%{ opacity:.85; transform: scale(1.05) rotate(20deg); }
-  }
+    .drop-zone .vase-base {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      z-index: 1;
+      pointer-events: none;
+    }
 
-  .restart-wrap{
-    margin-top: 22px;
-    position:relative;
-    z-index:2;
-  }
+    .drop-zone .vase-base .vase-layer,
+    .vase-stage .vase-base .vase-layer {
+      pointer-events: none;
+    }
 
-  .sr-only{
-    position:absolute;
-    width:1px;height:1px;
-    overflow:hidden;
-    clip:rect(0 0 0 0);
-  }
-</style>
+    .drop-zone .vase-base .vase-back-layer,
+    .vase-stage .vase-base .vase-back-layer {
+      z-index: 1;
+    }
+
+    .drop-zone .vase-base .vase-front-layer,
+    .vase-stage .vase-base .vase-front-layer {
+      z-index: 3;
+    }
+
+    .empty-vase-msg {
+      position: absolute;
+      top: 16px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-style: italic;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .placed-flower-d {
+      position: absolute;
+      transform-origin: bottom center;
+      transition: left .4s cubic-bezier(.34, 1.3, .64, 1), bottom .4s cubic-bezier(.34, 1.3, .64, 1), transform .4s cubic-bezier(.34, 1.3, .64, 1);
+    }
+
+    .placed-flower-d.stem-layer {
+      z-index: 2;
+    }
+
+    .placed-flower-d.head-layer {
+      z-index: 4;
+    }
+
+    .placed-flower-d svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: drop-shadow(0 3px 4px rgba(120, 90, 90, 0.18));
+      pointer-events: none;
+    }
+
+    .placed-flower-d .flower-stem-layer,
+    .placed-flower-d .flower-head-layer,
+    .placed-flower .flower-stem-layer,
+    .placed-flower .flower-head-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .placed-flower-d .flower-stem-layer svg,
+    .placed-flower .flower-stem-layer svg {
+      clip-path: inset(50% 0 0 0);
+    }
+
+    .placed-flower-d .flower-head-layer svg,
+    .placed-flower .flower-head-layer svg {
+      clip-path: inset(0 0 50% 0);
+    }
+
+    .placed-flower-d .del-x {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: var(--white);
+      border-radius: 50%;
+      border: none;
+      font-size: 11px;
+      line-height: 20px;
+      text-align: center;
+      color: var(--ink-soft);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transition: opacity .15s ease;
+      z-index: 60;
+    }
+
+    .placed-flower-d:hover .del-x,
+    .placed-flower-d.recent .del-x {
+      opacity: 1;
+    }
+
+    /* bottom flower tray, horizontally scrollable */
+    .flower-tray-bar {
+      flex-shrink: 0;
+      background: var(--white);
+      border-top: 1px solid rgba(190, 150, 150, 0.18);
+      box-shadow: 0 -6px 18px rgba(190, 150, 150, 0.12);
+      padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .tray-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      overflow-y: visible;
+      padding: 4px 14px 6px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .tray-scroll::-webkit-scrollbar {
+      height: 5px;
+    }
+
+    .tray-scroll::-webkit-scrollbar-thumb {
+      background: var(--blush-deep);
+      border-radius: 4px;
+    }
+
+    .tray-flower-card {
+      flex: 0 0 auto;
+      width: 78px;
+      text-align: center;
+      user-select: none;
+    }
+
+    .tray-flower-card .drag-handle {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      background: var(--cream);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;
+      transition: transform .15s ease, box-shadow .15s ease;
+      box-shadow: 0 2px 8px rgba(190, 150, 150, 0.15);
+    }
+
+    .tray-flower-card .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .tray-flower-card .drag-handle.lifting {
+      transform: scale(1.08);
+      box-shadow: 0 6px 16px rgba(190, 150, 150, 0.3);
+    }
+
+    .tray-flower-card .drag-handle svg {
+      width: 46px;
+      height: 46px;
+      pointer-events: none;
+    }
+
+    .tray-flower-card .fname {
+      font-size: 11px;
+      font-weight: 600;
+      margin: 5px 0 4px;
+      white-space: nowrap;
+    }
+
+    .tray-flower-card .swatches {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .tray-flower-card .swatch {
+      width: 14px;
+      height: 14px;
+    }
+
+    .vase-picker-wrap {
+      padding: 0 14px 10px;
+    }
+
+    .vase-picker {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .vase-option {
+      border: 1px solid rgba(190, 150, 150, 0.25);
+      background: var(--cream);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 10px;
+      border-radius: 999px;
+      transition: background .2s ease, transform .15s ease, border-color .2s ease;
+    }
+
+    .vase-option:hover {
+      background: var(--blush);
+      transform: translateY(-1px);
+    }
+
+    .vase-option.selected {
+      background: linear-gradient(135deg, var(--blush-deep), var(--gold));
+      color: var(--white);
+      border-color: transparent;
+    }
+
+    /* the floating ghost element that follows the pointer while dragging */
+    .drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.92;
+      transform: translate(-50%, -50%) scale(1.1);
+      filter: drop-shadow(0 6px 10px rgba(120, 90, 90, 0.3));
+    }
+
+    .drag-ghost svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    body.dragging-flower {
+      cursor: grabbing;
+    }
+
+    body.dragging-flower .tray-scroll {
+      overflow-x: hidden;
+    }
+
+    .designer-footer {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+      background: var(--white);
+      border-top: 1px solid rgba(190, 150, 150, 0.1);
+    }
+
+    .placed-count {
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+
+    .primary-btn {
+      display: block;
+      margin: 0 auto;
+      background: linear-gradient(135deg, var(--blush-deep), var(--gold));
+      color: var(--white);
+      border: none;
+      padding: 13px 34px;
+      border-radius: 999px;
+      font-size: 15.5px;
+      font-weight: 700;
+      box-shadow: 0 6px 16px rgba(220, 160, 150, 0.35);
+      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 9px 20px rgba(220, 160, 150, 0.45);
+    }
+
+    .primary-btn:active:not(:disabled) {
+      transform: translateY(0) scale(0.97);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .hint-text {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      margin-top: 8px;
+    }
+
+    .secondary-btn {
+      background: var(--white);
+      border: 2px solid var(--blush-deep);
+      color: var(--ink);
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      transition: background .2s ease, transform .15s ease;
+    }
+
+    .secondary-btn:hover {
+      background: var(--blush);
+      transform: translateY(-1px);
+    }
+
+    .secondary-btn:active {
+      transform: translateY(0) scale(0.96);
+    }
+
+    .ghost-btn {
+      background: none;
+      border: none;
+      color: var(--ink-soft);
+      font-size: 13.5px;
+      font-weight: 600;
+      text-decoration: underline;
+      padding: 6px;
+    }
+
+    .ghost-btn:hover {
+      color: var(--ink);
+    }
+
+    /* ---------- Step 2: Vase scene ---------- */
+    .vase-stage {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 420px;
+      margin: 0 auto 10px;
+    }
+
+    .vase-stage svg.vase-base {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      z-index: 1;
+    }
+
+    .flower-layer {
+      position: absolute;
+      bottom: 150px;
+      left: 50%;
+      width: 1px;
+      height: 1px;
+    }
+
+    .placed-flower {
+      position: absolute;
+      transform-origin: bottom center;
+      transition: left .55s cubic-bezier(.34, 1.3, .64, 1), bottom .55s cubic-bezier(.34, 1.3, .64, 1), transform .55s cubic-bezier(.34, 1.3, .64, 1);
+    }
+
+    .placed-flower.stem-layer {
+      z-index: 2;
+    }
+
+    .placed-flower.head-layer {
+      z-index: 4;
+    }
+
+    .placed-flower svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: drop-shadow(0 3px 4px rgba(120, 90, 90, 0.18));
+    }
+
+    .step2-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 14px 0 6px;
+    }
+
+    /* ---------- Step 3: Dedication card ---------- */
+    .note-card {
+      background: var(--white);
+      max-width: 440px;
+      margin: 0 auto;
+      border-radius: 18px;
+      padding: 26px 26px 22px;
+      box-shadow: 0 10px 26px rgba(190, 150, 150, 0.18);
+      position: relative;
+    }
+
+    .note-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 18px;
+      right: 18px;
+      height: 6px;
+      background: repeating-linear-gradient(90deg, var(--blush-deep) 0 14px, transparent 14px 22px);
+      border-radius: 0 0 6px 6px;
+      opacity: .55;
+    }
+
+    .field-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .field-input,
+    .field-textarea {
+      width: 100%;
+      border: 2px solid var(--blush);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 14.5px;
+      color: var(--ink);
+      margin-bottom: 16px;
+      transition: border-color .2s ease;
+      background: var(--cream);
+    }
+
+    .field-input:focus,
+    .field-textarea:focus {
+      outline: none;
+      border-color: var(--blush-deep);
+    }
+
+    .field-textarea {
+      min-height: 100px;
+      resize: vertical;
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      line-height: 1.4;
+    }
+
+    .char-count {
+      font-size: 11.5px;
+      color: var(--ink-soft);
+      text-align: right;
+      margin: -12px 0 14px;
+    }
+
+    /* ---------- Step 4: Reveal ---------- */
+    .reveal-screen {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .petal-field {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .petal {
+      position: absolute;
+      top: -5%;
+      opacity: 0;
+      animation: petalFall linear infinite;
+    }
+
+    @keyframes petalFall {
+      0% {
+        opacity: 0;
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+
+      8% {
+        opacity: .75;
+      }
+
+      90% {
+        opacity: .6;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(110vh) translateX(var(--drift)) rotate(340deg);
+      }
+    }
+
+    .reveal-vase-wrap {
+      opacity: 0;
+      transform: scale(.85);
+      animation: revealPop .8s ease forwards;
+      animation-delay: .1s;
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes revealPop {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .reveal-note {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: revealSlide .7s ease forwards;
+      animation-delay: 1.0s;
+      max-width: 460px;
+      margin: 18px auto 0;
+      background: rgba(255, 250, 246, 0.9);
+      backdrop-filter: blur(2px);
+      border-radius: 18px;
+      padding: 22px 28px;
+      box-shadow: 0 10px 30px rgba(190, 150, 150, 0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes revealSlide {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reveal-to {
+      font-size: 13px;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .reveal-message {
+      font-family: 'Caveat', cursive;
+      font-size: 26px;
+      line-height: 1.35;
+      color: var(--ink);
+      margin: 6px 0 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .reveal-from {
+      font-size: 14.5px;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+
+    .reveal-from span {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      color: var(--ink);
+    }
+
+    .sparkle {
+      position: absolute;
+      font-size: 16px;
+      opacity: 0;
+      animation: twinkle 2.4s ease-in-out infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: scale(.6) rotate(0deg);
+      }
+
+      50% {
+        opacity: .85;
+        transform: scale(1.05) rotate(20deg);
+      }
+    }
+
+    .restart-wrap {
+      margin-top: 22px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+  </style>
 </head>
+
 <body>
-<div id="app" class="app"></div>
+  <div id="app" class="app"></div>
 
-<script>
-(function(){
+  <script>
+    (function () {
 
-  /* ============================================================
-     FLOWER DEFINITIONS — SVGs with currentColor so fill is set
-     dynamically via inline style. Each flower has color options.
-  ============================================================ */
+      /* ============================================================
+         FLOWER DEFINITIONS — SVGs with currentColor so fill is set
+         dynamically via inline style. Each flower has color options.
+      ============================================================ */
 
-  const COLORS = {
-    red: '#d96c6c',
-    pink: '#f0a8c0',
-    white: '#fbf6ef',
-    peach: '#f3b98a',
-    yellow: '#f0cf6c',
-    lavenderC: '#bda3da',
-    blue: '#9bb9da'
-  };
+      const COLORS = {
+        red: '#d96c6c',
+        pink: '#f0a8c0',
+        white: '#fbf6ef',
+        peach: '#f3b98a',
+        yellow: '#f0cf6c',
+        lavenderC: '#bda3da',
+        blue: '#9bb9da'
+      };
 
-  const FLOWER_TYPES = [
-    {
-      id: 'rose', name: 'Rose', size: 'large', role: 'focal',
-      colors: ['red','pink','peach','white'],
-      svg: (c) => `
+      const FLOWER_TYPES = [
+        {
+          id: 'rose', name: 'Rose', size: 'large', role: 'focal',
+          colors: ['red', 'pink', 'peach', 'white'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 56 C36 90 38 120 34 152" stroke="#5e8a4d" stroke-width="3" fill="none" stroke-linecap="round"/>
           <path d="M36 105 C28 101 22 105 18 113 C26 115 32 113 36 107 Z" fill="#6a9a57"/>
           <path d="M38 128 C46 124 52 128 56 136 C48 138 42 136 38 130 Z" fill="#5e8a4d"/>
           <g>
-            <ellipse cx="22" cy="36" rx="11" ry="15" transform="rotate(-35 22 36)" fill="${shade(c,10)}"/>
-            <ellipse cx="58" cy="36" rx="11" ry="15" transform="rotate(35 58 36)" fill="${shade(c,6)}"/>
-            <ellipse cx="40" cy="22" rx="14" ry="12" fill="${shade(c,8)}"/>
-            <ellipse cx="26" cy="50" rx="12" ry="14" transform="rotate(-15 26 50)" fill="${shade(c,-2)}"/>
-            <ellipse cx="54" cy="50" rx="12" ry="14" transform="rotate(15 54 50)" fill="${shade(c,-4)}"/>
-            <ellipse cx="32" cy="34" rx="10" ry="12" transform="rotate(-20 32 34)" fill="${shade(c,4)}"/>
+            <ellipse cx="22" cy="36" rx="11" ry="15" transform="rotate(-35 22 36)" fill="${shade(c, 10)}"/>
+            <ellipse cx="58" cy="36" rx="11" ry="15" transform="rotate(35 58 36)" fill="${shade(c, 6)}"/>
+            <ellipse cx="40" cy="22" rx="14" ry="12" fill="${shade(c, 8)}"/>
+            <ellipse cx="26" cy="50" rx="12" ry="14" transform="rotate(-15 26 50)" fill="${shade(c, -2)}"/>
+            <ellipse cx="54" cy="50" rx="12" ry="14" transform="rotate(15 54 50)" fill="${shade(c, -4)}"/>
+            <ellipse cx="32" cy="34" rx="10" ry="12" transform="rotate(-20 32 34)" fill="${shade(c, 4)}"/>
             <ellipse cx="48" cy="34" rx="10" ry="12" transform="rotate(20 48 34)" fill="${c}"/>
-            <ellipse cx="40" cy="42" rx="11" ry="10" fill="${shade(c,-6)}"/>
-            <path d="M40 38 C46 36 48 30 44 26 C40 23 35 25 35 30 C35 34 39 36 42 34" fill="none" stroke="${shade(c,-16)}" stroke-width="2.4" stroke-linecap="round"/>
-            <circle cx="40" cy="33" r="5" fill="${shade(c,-12)}"/>
+            <ellipse cx="40" cy="42" rx="11" ry="10" fill="${shade(c, -6)}"/>
+            <path d="M40 38 C46 36 48 30 44 26 C40 23 35 25 35 30 C35 34 39 36 42 34" fill="none" stroke="${shade(c, -16)}" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="40" cy="33" r="5" fill="${shade(c, -12)}"/>
           </g>
         </svg>`
-    },
-    {
-      id: 'tulip', name: 'Tulip', size: 'medium', role: 'focal',
-      colors: ['red','pink','white','yellow'],
-      svg: (c) => `
+        },
+        {
+          id: 'tulip', name: 'Tulip', size: 'medium', role: 'focal',
+          colors: ['red', 'pink', 'white', 'yellow'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 58 C37 88 39 122 35 152" stroke="#5e8a4d" stroke-width="3" fill="none" stroke-linecap="round"/>
           <path d="M37 100 C28 98 22 104 19 114 C28 114 34 110 37 102 Z" fill="#6a9a57"/>
           <path d="M39 125 C47 122 53 127 56 136 C48 137 42 134 39 127 Z" fill="#5e8a4d"/>
           <path d="M40 20 C28 20 26 38 26 46 C26 56 33 60 40 60 C47 60 54 56 54 46 C54 38 52 20 40 20 Z" fill="${c}"/>
-          <path d="M40 24 C34 26 32 38 33 46 C34 53 37 56 40 57 Z" fill="${shade(c,8)}" opacity="0.6"/>
-          <path d="M40 24 C46 26 48 38 47 46 C46 53 43 56 40 57 Z" fill="${shade(c,-6)}" opacity="0.5"/>
+          <path d="M40 24 C34 26 32 38 33 46 C34 53 37 56 40 57 Z" fill="${shade(c, 8)}" opacity="0.6"/>
+          <path d="M40 24 C46 26 48 38 47 46 C46 53 43 56 40 57 Z" fill="${shade(c, -6)}" opacity="0.5"/>
         </svg>`
-    },
-    {
-      id: 'daisy', name: 'Daisy', size: 'small', role: 'accent',
-      colors: ['white','yellow','pink'],
-      svg: (c) => `
+        },
+        {
+          id: 'daisy', name: 'Daisy', size: 'small', role: 'accent',
+          colors: ['white', 'yellow', 'pink'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 58 C38 90 41 122 38 152" stroke="#6a9a57" stroke-width="2.5" fill="none" stroke-linecap="round"/>
           <path d="M38 105 C30 103 25 108 22 116 C30 117 35 113 38 107 Z" fill="#7aab66"/>
@@ -689,11 +888,11 @@
           </g>
           <circle cx="40" cy="40" r="10" fill="#eec05a"/>
         </svg>`
-    },
-    {
-      id: 'sunflower', name: 'Sunflower', size: 'large', role: 'focal',
-      colors: ['yellow'],
-      svg: (c) => `
+        },
+        {
+          id: 'sunflower', name: 'Sunflower', size: 'large', role: 'focal',
+          colors: ['yellow'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 62 C36 92 40 124 36 152" stroke="#5e8a4d" stroke-width="4" fill="none" stroke-linecap="round"/>
           <path d="M36 100 C25 97 18 103 14 113 C24 115 32 111 36 103 Z" fill="#6a9a57"/>
@@ -711,29 +910,29 @@
           <circle cx="40" cy="40" r="13" fill="#7a5230"/>
           <circle cx="40" cy="40" r="13" fill="#8a6038" opacity="0.5"/>
         </svg>`
-    },
-    {
-      id: 'peony', name: 'Peony', size: 'large', role: 'focal',
-      colors: ['pink','white','peach'],
-      svg: (c) => `
+        },
+        {
+          id: 'peony', name: 'Peony', size: 'large', role: 'focal',
+          colors: ['pink', 'white', 'peach'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 62 C37 92 39 124 35 152" stroke="#5e8a4d" stroke-width="3.5" fill="none" stroke-linecap="round"/>
           <path d="M37 102 C28 99 21 104 17 113 C26 115 33 111 37 104 Z" fill="#6a9a57"/>
           <path d="M39 128 C48 124 55 129 59 138 C50 140 43 137 39 130 Z" fill="#5e8a4d"/>
-          <circle cx="40" cy="40" r="18" fill="${shade(c,6)}"/>
+          <circle cx="40" cy="40" r="18" fill="${shade(c, 6)}"/>
           <circle cx="32" cy="34" r="9" fill="${c}"/>
           <circle cx="48" cy="34" r="9" fill="${c}"/>
-          <circle cx="32" cy="46" r="9" fill="${shade(c,-4)}"/>
-          <circle cx="48" cy="46" r="9" fill="${shade(c,-4)}"/>
-          <circle cx="40" cy="30" r="9" fill="${shade(c,3)}"/>
-          <circle cx="40" cy="50" r="9" fill="${shade(c,-8)}"/>
-          <circle cx="40" cy="40" r="9" fill="${shade(c,10)}"/>
+          <circle cx="32" cy="46" r="9" fill="${shade(c, -4)}"/>
+          <circle cx="48" cy="46" r="9" fill="${shade(c, -4)}"/>
+          <circle cx="40" cy="30" r="9" fill="${shade(c, 3)}"/>
+          <circle cx="40" cy="50" r="9" fill="${shade(c, -8)}"/>
+          <circle cx="40" cy="40" r="9" fill="${shade(c, 10)}"/>
         </svg>`
-    },
-    {
-      id: 'lavender', name: 'Lavender', size: 'filler', role: 'filler',
-      colors: ['lavenderC','blue'],
-      svg: (c) => `
+        },
+        {
+          id: 'lavender', name: 'Lavender', size: 'filler', role: 'filler',
+          colors: ['lavenderC', 'blue'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <line x1="40" y1="70" x2="40" y2="152" stroke="#7c9a6c" stroke-width="2.5"/>
           <g fill="${c}">
@@ -746,11 +945,11 @@
             <circle cx="40" cy="56" r="6"/>
           </g>
         </svg>`
-    },
-    {
-      id: 'babybreath', name: "Baby's Breath", size: 'filler', role: 'filler',
-      colors: ['white'],
-      svg: (c) => `
+        },
+        {
+          id: 'babybreath', name: "Baby's Breath", size: 'filler', role: 'filler',
+          colors: ['white'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 152 L32 56 M40 152 L48 50 M40 152 L24 70 M40 152 L56 68" stroke="#9bb47f" stroke-width="2" fill="none"/>
           <g fill="${c}">
@@ -763,11 +962,11 @@
             <circle cx="62" cy="82" r="4"/>
           </g>
         </svg>`
-    },
-    {
-      id: 'eucalyptus', name: 'Eucalyptus', size: 'filler', role: 'greenery',
-      colors: ['#8aa869'],
-      svg: (c) => `
+        },
+        {
+          id: 'eucalyptus', name: 'Eucalyptus', size: 'filler', role: 'greenery',
+          colors: ['#8aa869'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <line x1="40" y1="152" x2="40" y2="16" stroke="#7c9a6c" stroke-width="2.5"/>
           <g fill="${c}">
@@ -781,11 +980,11 @@
             <ellipse cx="52" cy="122" rx="8" ry="5" transform="rotate(25 52 122)"/>
           </g>
         </svg>`
-    },
-    {
-      id: 'carnation', name: 'Carnation', size: 'medium', role: 'accent',
-      colors: ['red','pink','white','peach'],
-      svg: (c) => `
+        },
+        {
+          id: 'carnation', name: 'Carnation', size: 'medium', role: 'accent',
+          colors: ['red', 'pink', 'white', 'peach'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 58 C38 90 40 122 37 152" stroke="#6a9a57" stroke-width="2.6" fill="none" stroke-linecap="round"/>
           <path d="M37 100 C29 98 24 102 20 111 C28 111 35 108 37 102 Z" fill="#7aab66"/>
@@ -798,13 +997,13 @@
             <path d="M40 38 C35 41 32 48 30 56 C37 56 43 54 43 47 Z"/>
             <path d="M40 38 C45 41 48 48 50 56 C43 56 37 54 37 47 Z"/>
           </g>
-          <circle cx="40" cy="34" r="6" fill="${shade(c,-8)}"/>
+          <circle cx="40" cy="34" r="6" fill="${shade(c, -8)}"/>
         </svg>`
-    },
-    {
-      id: 'hydrangea', name: 'Hydrangea', size: 'large', role: 'focal',
-      colors: ['pink','lavenderC','white','blue'],
-      svg: (c) => `
+        },
+        {
+          id: 'hydrangea', name: 'Hydrangea', size: 'large', role: 'focal',
+          colors: ['pink', 'lavenderC', 'white', 'blue'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 56 C38 90 40 123 36 152" stroke="#6a9a57" stroke-width="2.8" fill="none" stroke-linecap="round"/>
           <path d="M36 102 C27 99 20 103 17 112 C25 113 32 110 36 104 Z" fill="#7aab66"/>
@@ -817,13 +1016,13 @@
             <ellipse cx="48" cy="48" rx="10" ry="9"/>
             <ellipse cx="40" cy="42" rx="10" ry="9"/>
           </g>
-          <circle cx="40" cy="36" r="6" fill="${shade(c,-10)}"/>
+          <circle cx="40" cy="36" r="6" fill="${shade(c, -10)}"/>
         </svg>`
-    },
-    {
-      id: 'ranunculus', name: 'Ranunculus', size: 'medium', role: 'accent',
-      colors: ['pink','white','peach','yellow'],
-      svg: (c) => `
+        },
+        {
+          id: 'ranunculus', name: 'Ranunculus', size: 'medium', role: 'accent',
+          colors: ['pink', 'white', 'peach', 'yellow'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 56 C38 90 40 122 37 152" stroke="#6a9a57" stroke-width="2.6" fill="none" stroke-linecap="round"/>
           <path d="M37 102 C28 100 22 104 18 112 C27 113 32 110 37 104 Z" fill="#7aab66"/>
@@ -836,13 +1035,13 @@
             <ellipse cx="53" cy="44" rx="8" ry="12" transform="rotate(40 53 44)"/>
             <ellipse cx="40" cy="44" rx="8" ry="12"/>
           </g>
-          <circle cx="40" cy="34" r="7" fill="${shade(c,-9)}"/>
+          <circle cx="40" cy="34" r="7" fill="${shade(c, -9)}"/>
         </svg>`
-    },
-    {
-      id: 'statice', name: 'Statice', size: 'filler', role: 'filler',
-      colors: ['lavenderC','blue','white'],
-      svg: (c) => `
+        },
+        {
+          id: 'statice', name: 'Statice', size: 'filler', role: 'filler',
+          colors: ['lavenderC', 'blue', 'white'],
+          svg: (c) => `
         <svg viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 58 C37 90 39 122 36 152" stroke="#7aab66" stroke-width="2.2" fill="none" stroke-linecap="round"/>
           <path d="M36 104 C28 102 23 105 20 112 C29 112 34 109 36 104 Z" fill="#7aab66"/>
@@ -856,126 +1055,126 @@
             <circle cx="40" cy="42" r="4.5"/>
           </g>
         </svg>`
-    }
-  ];
+        }
+      ];
 
-  const VASES = [
-    {
-      id: 'classic', name: 'Classic', openingPoint: { x: 0, y: 30 },
-      svg: `
-        <path class="vase-layer vase-back-layer" d="M70 24 C70 12 150 12 150 24 L160 72 C176 92 180 132 166 162 C151 190 69 190 54 162 C40 132 44 92 60 72 Z" fill="var(--lavender)" stroke="${shade('#e3d6f0',-15)}" stroke-width="2"/>
-        <ellipse class="vase-layer vase-back-layer" cx="110" cy="26" rx="40" ry="8" fill="${shade('#e3d6f0',-8)}" opacity="0.6"/>
-        <path class="vase-layer vase-front-layer" d="M70 34 C70 24 150 24 150 34 L152 56 C154 62 157 70 158 76 C164 102 160 142 147 158 C135 172 85 172 73 158 C60 142 56 102 62 76 C63 70 66 62 68 56 Z" fill="${shade('#e3d6f0',-6)}" opacity="0.95"/>
-        <path class="vase-layer vase-front-layer" d="M70 24 C70 12 150 12 150 24" fill="none" stroke="${shade('#e3d6f0',-20)}" stroke-width="2"/>
+      const VASES = [
+        {
+          id: 'classic', name: 'Classic', openingPoint: { x: 0, y: 30 },
+          svg: `
+        <path class="vase-layer vase-back-layer" d="M70 24 C70 12 150 12 150 24 L160 72 C176 92 180 132 166 162 C151 190 69 190 54 162 C40 132 44 92 60 72 Z" fill="var(--lavender)" stroke="${shade('#e3d6f0', -15)}" stroke-width="2"/>
+        <ellipse class="vase-layer vase-back-layer" cx="110" cy="26" rx="40" ry="8" fill="${shade('#e3d6f0', -8)}" opacity="0.6"/>
+        <path class="vase-layer vase-front-layer" d="M70 34 C70 24 150 24 150 34 L152 56 C154 62 157 70 158 76 C164 102 160 142 147 158 C135 172 85 172 73 158 C60 142 56 102 62 76 C63 70 66 62 68 56 Z" fill="${shade('#e3d6f0', -6)}" opacity="0.95"/>
+        <path class="vase-layer vase-front-layer" d="M70 24 C70 12 150 12 150 24" fill="none" stroke="${shade('#e3d6f0', -20)}" stroke-width="2"/>
         <ellipse class="vase-layer vase-front-layer" cx="90" cy="64" rx="10" ry="22" fill="#ffffff" opacity="0.24"/>
       `
-    },
-    {
-      id: 'round', name: 'Round', openingPoint: { x: 0, y: 34 },
-      svg: `
-        <path class="vase-layer vase-back-layer" d="M82 28 C82 16 138 16 138 28 L146 72 C154 100 155 136 140 164 C128 186 92 186 80 164 C65 136 66 100 74 72 Z" fill="var(--blush)" stroke="${shade('#eab8c2',-18)}" stroke-width="2"/>
-        <path class="vase-layer vase-back-layer" d="M88 26 C88 20 132 20 132 26 C132 34 125 42 110 42 C95 42 88 34 88 26 Z" fill="${shade('#eab8c2',-10)}" opacity="0.75"/>
-        <path class="vase-layer vase-front-layer" d="M86 40 C86 32 134 32 134 40 L136 58 C138 68 138 84 132 98 C126 110 120 118 110 118 C100 118 94 110 88 98 C82 84 82 68 84 58 Z" fill="${shade('#eab8c2',-6)}" opacity="0.95"/>
+        },
+        {
+          id: 'round', name: 'Round', openingPoint: { x: 0, y: 34 },
+          svg: `
+        <path class="vase-layer vase-back-layer" d="M82 28 C82 16 138 16 138 28 L146 72 C154 100 155 136 140 164 C128 186 92 186 80 164 C65 136 66 100 74 72 Z" fill="var(--blush)" stroke="${shade('#eab8c2', -18)}" stroke-width="2"/>
+        <path class="vase-layer vase-back-layer" d="M88 26 C88 20 132 20 132 26 C132 34 125 42 110 42 C95 42 88 34 88 26 Z" fill="${shade('#eab8c2', -10)}" opacity="0.75"/>
+        <path class="vase-layer vase-front-layer" d="M86 40 C86 32 134 32 134 40 L136 58 C138 68 138 84 132 98 C126 110 120 118 110 118 C100 118 94 110 88 98 C82 84 82 68 84 58 Z" fill="${shade('#eab8c2', -6)}" opacity="0.95"/>
         <ellipse class="vase-layer vase-front-layer" cx="110" cy="58" rx="12" ry="20" fill="#ffffff" opacity="0.2"/>
       `
-    },
-    {
-      id: 'cylinder', name: 'Cylinder', openingPoint: { x: 0, y: 28 },
-      svg: `
-        <rect class="vase-layer vase-back-layer" x="76" y="30" width="68" height="128" rx="18" fill="var(--sage)" stroke="${shade('#b9c9a9',-14)}" stroke-width="2"/>
-        <rect class="vase-layer vase-back-layer" x="86" y="22" width="48" height="18" rx="9" fill="${shade('#b9c9a9',-7)}" opacity="0.75"/>
-        <rect class="vase-layer vase-front-layer" x="76" y="40" width="68" height="16" rx="8" fill="${shade('#b9c9a9',-4)}"/>
+        },
+        {
+          id: 'cylinder', name: 'Cylinder', openingPoint: { x: 0, y: 28 },
+          svg: `
+        <rect class="vase-layer vase-back-layer" x="76" y="30" width="68" height="128" rx="18" fill="var(--sage)" stroke="${shade('#b9c9a9', -14)}" stroke-width="2"/>
+        <rect class="vase-layer vase-back-layer" x="86" y="22" width="48" height="18" rx="9" fill="${shade('#b9c9a9', -7)}" opacity="0.75"/>
+        <rect class="vase-layer vase-front-layer" x="76" y="40" width="68" height="16" rx="8" fill="${shade('#b9c9a9', -4)}"/>
         <rect class="vase-layer vase-front-layer" x="84" y="60" width="52" height="16" rx="8" fill="#ffffff" opacity="0.18"/>
       `
-    }
-  ];
+        }
+      ];
 
-  function shade(hex, percent){
-    // lighten/darken a hex color by percent (-100..100)
-    let f = parseInt(hex.slice(1),16);
-    let t = percent < 0 ? 0 : 255;
-    let p = Math.abs(percent)/100;
-    let R = f>>16, G = (f>>8)&0x00FF, B = f&0x0000FF;
-    const r = Math.round((t-R)*p)+R;
-    const g = Math.round((t-G)*p)+G;
-    const b = Math.round((t-B)*p)+B;
-    return '#' + (0x1000000 + r*0x10000 + g*0x100 + b).toString(16).slice(1);
-  }
+      function shade(hex, percent) {
+        // lighten/darken a hex color by percent (-100..100)
+        let f = parseInt(hex.slice(1), 16);
+        let t = percent < 0 ? 0 : 255;
+        let p = Math.abs(percent) / 100;
+        let R = f >> 16, G = (f >> 8) & 0x00FF, B = f & 0x0000FF;
+        const r = Math.round((t - R) * p) + R;
+        const g = Math.round((t - G) * p) + G;
+        const b = Math.round((t - B) * p) + B;
+        return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+      }
 
-  const COLOR_NAMES = {
-    red: 'Red', pink: 'Pink', white: 'White', peach: 'Peach',
-    yellow: 'Yellow', lavenderC: 'Lavender', blue: 'Blue'
-  };
+      const COLOR_NAMES = {
+        red: 'Red', pink: 'Pink', white: 'White', peach: 'Peach',
+        yellow: 'Yellow', lavenderC: 'Lavender', blue: 'Blue'
+      };
 
-  /* ============================================================
-     STATE
-  ============================================================ */
-  let state = {
-    step: 1,
-    selectedColors: {},       // flowerId -> current swatch color key chosen in UI
-    placedFlowers: [],        // array of {flowerId, colorKey, uid, x, bottomOffset, width, height, rotation, z} — manually placed in the vase
-    selectedVase: 'classic',
-    to: '',
-    from: '',
-    message: ''
-  };
+      /* ============================================================
+         STATE
+      ============================================================ */
+      let state = {
+        step: 1,
+        selectedColors: {},       // flowerId -> current swatch color key chosen in UI
+        placedFlowers: [],        // array of {flowerId, colorKey, uid, x, bottomOffset, width, height, rotation, z} — manually placed in the vase
+        selectedVase: 'classic',
+        to: '',
+        from: '',
+        message: ''
+      };
 
-  const MAX_FLOWERS = 9;
-  const PLACED_FLOWER_HEIGHT = 106;
-  let uidCounter = 0;
+      const MAX_FLOWERS = 9;
+      const PLACED_FLOWER_HEIGHT = 106;
+      let uidCounter = 0;
 
-  const root = document.getElementById('app');
+      const root = document.getElementById('app');
 
-  function render(){
-    if(state.step === 1) renderStep1();
-    else if(state.step === 3) renderStep3();
-    else if(state.step === 4) renderStep4();
-  }
+      function render() {
+        if (state.step === 1) renderStep1();
+        else if (state.step === 3) renderStep3();
+        else if (state.step === 4) renderStep4();
+      }
 
-  function stepTrackHTML(current){
-    // 3 visible stages now: 1 = design, 2 = dedication, 3 = reveal
-    const map = {1:1, 3:2, 4:3};
-    const activeIdx = map[current] || 1;
-    let dots = '';
-    for(let i=1;i<=3;i++){
-      let cls = i === activeIdx ? 'active' : (i < activeIdx ? 'done' : '');
-      dots += `<div class="step-dot ${cls}"></div>`;
-    }
-    return `<div class="step-track">${dots}</div>`;
-  }
+      function stepTrackHTML(current) {
+        // 3 visible stages now: 1 = design, 2 = dedication, 3 = reveal
+        const map = { 1: 1, 3: 2, 4: 3 };
+        const activeIdx = map[current] || 1;
+        let dots = '';
+        for (let i = 1; i <= 3; i++) {
+          let cls = i === activeIdx ? 'active' : (i < activeIdx ? 'done' : '');
+          dots += `<div class="step-dot ${cls}"></div>`;
+        }
+        return `<div class="step-track">${dots}</div>`;
+      }
 
-  /* ---------------- STEP 1: DRAG-AND-DROP DESIGNER ---------------- */
-  // placedFlowers: array of {flowerId, colorKey, uid, x, y, size, rotation, z}
-  // x,y are stored as pixel offsets relative to the drop-zone's center-bottom anchor point
-  let dragState = null; // {flowerId, colorKey, ghostEl, fromHandleEl}
+      /* ---------------- STEP 1: DRAG-AND-DROP DESIGNER ---------------- */
+      // placedFlowers: array of {flowerId, colorKey, uid, x, y, size, rotation, z}
+      // x,y are stored as pixel offsets relative to the drop-zone's center-bottom anchor point
+      let dragState = null; // {flowerId, colorKey, ghostEl, fromHandleEl}
 
-  function renderStep1(){
-    FLOWER_TYPES.forEach(f => {
-      if(!state.selectedColors[f.id]) state.selectedColors[f.id] = f.colors[0];
-    });
+      function renderStep1() {
+        FLOWER_TYPES.forEach(f => {
+          if (!state.selectedColors[f.id]) state.selectedColors[f.id] = f.colors[0];
+        });
 
-    const trayCards = FLOWER_TYPES.map(f => {
-      const chosenColor = state.selectedColors[f.id];
-      const hex = COLORS[chosenColor] || chosenColor;
-      const swatches = f.colors.map(ck => {
-        const chex = COLORS[ck] || ck;
-        const sel = ck === chosenColor ? 'selected' : '';
-        return `<button class="swatch ${sel}" style="background:${chex}" data-flower="${f.id}" data-color="${ck}" aria-label="${COLOR_NAMES[ck]||ck} ${f.name}" title="${COLOR_NAMES[ck]||ck}"></button>`;
-      }).join('');
+        const trayCards = FLOWER_TYPES.map(f => {
+          const chosenColor = state.selectedColors[f.id];
+          const hex = COLORS[chosenColor] || chosenColor;
+          const swatches = f.colors.map(ck => {
+            const chex = COLORS[ck] || ck;
+            const sel = ck === chosenColor ? 'selected' : '';
+            return `<button class="swatch ${sel}" style="background:${chex}" data-flower="${f.id}" data-color="${ck}" aria-label="${COLOR_NAMES[ck] || ck} ${f.name}" title="${COLOR_NAMES[ck] || ck}"></button>`;
+          }).join('');
 
-      return `
+          return `
         <div class="tray-flower-card">
           <div class="drag-handle" data-handle="${f.id}" tabindex="0" role="button" aria-label="Drag ${f.name} into the vase">${f.svg(hex)}</div>
           <div class="fname">${f.name}</div>
           <div class="swatches">${swatches}</div>
         </div>`;
-    }).join('');
+        }).join('');
 
-    const placedHTML = state.placedFlowers.map(placedFlowerDesignerHTML).join('');
-    const count = state.placedFlowers.length;
+        const placedHTML = state.placedFlowers.map(placedFlowerDesignerHTML).join('');
+        const count = state.placedFlowers.length;
 
-    root.className = 'full-bleed';
-    root.innerHTML = `
+        root.className = 'full-bleed';
+        root.innerHTML = `
       <div class="designer">
         <div class="designer-header">
           <div class="eyebrow">Make something special</div>
@@ -990,7 +1189,7 @@
         </div>
 
         <div class="designer-footer">
-          <span class="placed-count">${count} flower${count===1?'':'s'} placed${count >= MAX_FLOWERS ? ' — vase is full 💐' : ''}</span>
+          <span class="placed-count">${count} flower${count === 1 ? '' : 's'} placed${count >= MAX_FLOWERS ? ' — vase is full 💐' : ''}</span>
         </div>
 
         <div class="flower-tray-bar">
@@ -1007,29 +1206,29 @@
       </div>
     `;
 
-    wireDesignerDrag();
+        wireDesignerDrag();
 
-    const nextBtn = document.getElementById('toStep3b');
-    if(nextBtn){
-      nextBtn.addEventListener('click', () => {
-        if(state.placedFlowers.length === 0) return;
-        snapshotArrangementForPreview();
-        state.step = 3;
-        render();
-      });
-    }
-  }
+        const nextBtn = document.getElementById('toStep3b');
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            if (state.placedFlowers.length === 0) return;
+            snapshotArrangementForPreview();
+            state.step = 3;
+            render();
+          });
+        }
+      }
 
-  function getSelectedVase(){
-    return VASES.find(v => v.id === state.selectedVase) || VASES[0];
-  }
+      function getSelectedVase() {
+        return VASES.find(v => v.id === state.selectedVase) || VASES[0];
+      }
 
-  function placedFlowerDesignerHTML(item){
-    const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
-    const hex = COLORS[item.colorKey] || item.colorKey;
-    const svgMarkup = f.svg(hex);
-    const baseStyle = `left:${item.x}px; bottom:${item.bottomOffset}px; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg);`;
-    return `
+      function placedFlowerDesignerHTML(item) {
+        const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
+        const hex = COLORS[item.colorKey] || item.colorKey;
+        const svgMarkup = f.svg(hex);
+        const baseStyle = `left:${item.x}px; bottom:${item.bottomOffset}px; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg);`;
+        return `
       <div class="placed-flower-d stem-layer" data-uid="${item.uid}" style="${baseStyle} z-index:${item.stemZ};">
         <div class="flower-stem-layer">${svgMarkup}</div>
       </div>
@@ -1037,248 +1236,259 @@
         <div class="flower-head-layer">${svgMarkup}</div>
         <button class="del-x" data-del="${item.uid}" aria-label="Remove this flower" style="top:-8px;">✕</button>
       </div>`;
-  }
+      }
 
-  function rand(min,max){ return Math.random()*(max-min)+min; }
+      function rand(min, max) { return Math.random() * (max - min) + min; }
 
-  function wireDesignerDrag(){
-    // delete buttons on already-placed flowers
-    root.querySelectorAll('[data-del]').forEach(btn => {
-      btn.addEventListener('pointerdown', (e) => e.stopPropagation());
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const uid = btn.getAttribute('data-del');
-        const flower = state.placedFlowers.find(p => p.uid === uid);
-        if(flower) {
-          state.placedFlowers = state.placedFlowers.filter(p => p.uid !== uid);
+      function wireDesignerDrag() {
+        // delete buttons on already-placed flowers
+        root.querySelectorAll('[data-del]').forEach(btn => {
+          btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const uid = btn.getAttribute('data-del');
+            const flower = state.placedFlowers.find(p => p.uid === uid);
+            if (flower) {
+              state.placedFlowers = state.placedFlowers.filter(p => p.uid !== uid);
+              renderStep1();
+            }
+          });
+        });
+
+        // start drag from tray handles
+        root.querySelectorAll('.drag-handle').forEach(handle => {
+          handle.addEventListener('pointerdown', (e) => {
+            if (state.placedFlowers.length >= MAX_FLOWERS) return;
+            e.preventDefault();
+            const flowerId = handle.getAttribute('data-handle');
+            const colorKey = state.selectedColors[flowerId];
+            startDrag(flowerId, colorKey, e.clientX, e.clientY, handle, e.pointerId);
+          });
+          // keyboard fallback: Enter/Space drops flower into the best open slot
+          handle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (state.placedFlowers.length >= MAX_FLOWERS) return;
+              const flowerId = handle.getAttribute('data-handle');
+              const colorKey = state.selectedColors[flowerId];
+              dropFlowerAtCenter(flowerId, colorKey);
+            }
+          });
+        });
+
+        // swatch clicks inside tray
+        root.querySelectorAll('.swatch').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const flowerId = btn.getAttribute('data-flower');
+            const colorKey = btn.getAttribute('data-color');
+            state.selectedColors[flowerId] = colorKey;
+            renderStep1();
+          });
+        });
+
+        root.querySelectorAll('.vase-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.selectedVase = btn.getAttribute('data-vase');
+            renderStep1();
+          });
+        });
+      }
+
+      function getPlacementForFlower(index, dropZoneRect) {
+        // Tighter, more natural bouquet fan — flowers cluster into the vase neck
+        // instead of sticking out past its sides.
+        const slots = [
+          { xOffset: -30, bottomOffset: 138, rotation: -14 },
+          { xOffset: 30, bottomOffset: 138, rotation: 14 },
+          { xOffset: -16, bottomOffset: 152, rotation: -6 },
+          { xOffset: 16, bottomOffset: 152, rotation: 6 },
+          { xOffset: 0, bottomOffset: 168, rotation: 0 },
+          { xOffset: -42, bottomOffset: 122, rotation: -20 },
+          { xOffset: 42, bottomOffset: 122, rotation: 20 },
+          { xOffset: -22, bottomOffset: 108, rotation: -9 },
+          { xOffset: 22, bottomOffset: 108, rotation: 9 }
+        ];
+        const vase = getSelectedVase();
+        const vaseSvgWidth = 220;
+        const vaseSvgHeight = 200;
+        const vaseRenderWidth = 200; // matches CSS .vase-base { width: 200px }
+        const vaseRenderHeight = vaseRenderWidth * vaseSvgHeight / vaseSvgWidth;
+        const openingX = dropZoneRect.width / 2 + vase.openingPoint.x;
+        const openingY = vaseRenderHeight - vase.openingPoint.y * (vaseRenderHeight / vaseSvgHeight);
+        const slot = slots[index % slots.length] || { xOffset: 0, bottomOffset: 158, rotation: 0 };
+        // small random jitter so it doesn't look robotic/identical every time
+        const jitterX = (Math.random() - 0.5) * 8;
+        const jitterR = (Math.random() - 0.5) * 4;
+        const x = openingX + slot.xOffset + jitterX;
+        const bottomOffset = openingY - slot.bottomOffset;
+        const scale = PLACED_FLOWER_HEIGHT / 160;
+        return {
+          x: Math.round(x),
+          bottomOffset: Math.round(bottomOffset),
+          rotation: slot.rotation + jitterR,
+          width: Math.round(80 * scale),
+          height: PLACED_FLOWER_HEIGHT,
+          stemZ: 2 + index,
+          headZ: 30 + index
+        };
+      }
+
+      function placeFlowerInSlot(flowerId, colorKey, dropZoneRect, index) {
+        const placement = getPlacementForFlower(index, dropZoneRect);
+        uidCounter++;
+        state.placedFlowers.push({
+          flowerId, colorKey, uid: 'p' + uidCounter,
+          x: placement.x,
+          bottomOffset: placement.bottomOffset,
+          width: placement.width,
+          height: placement.height,
+          rotation: placement.rotation,
+          z: placement.z
+        });
+      }
+
+      function dropFlowerAtCenter(flowerId, colorKey) {
+        const dropZone = document.getElementById('dropZone');
+        if (!dropZone) return;
+        const rect = dropZone.getBoundingClientRect();
+        placeFlowerInSlot(flowerId, colorKey, rect, state.placedFlowers.length);
+        renderStep1();
+      }
+
+      function startDrag(flowerId, colorKey, startX, startY, handleEl, pointerId) {
+        const hex = COLORS[colorKey] || colorKey;
+        const scale = PLACED_FLOWER_HEIGHT / 160;
+        const width = Math.round(80 * scale);
+        const height = PLACED_FLOWER_HEIGHT;
+
+        const ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        ghost.style.width = width + 'px';
+        ghost.style.height = height + 'px';
+        ghost.style.left = startX + 'px';
+        ghost.style.top = startY + 'px';
+        ghost.innerHTML = FLOWER_TYPES.find(x => x.id === flowerId).svg(hex);
+        document.body.appendChild(ghost);
+        document.body.classList.add('dragging-flower');
+        handleEl.classList.add('lifting');
+
+        // Lock the pointer to this handle so scrolling/other elements can't steal the drag
+        try { handleEl.setPointerCapture(pointerId); } catch (err) { }
+
+        dragState = { flowerId, colorKey, ghostEl: ghost, handleEl };
+
+        function onMove(e) {
+          if (!dragState) return;
+          e.preventDefault();
+          const x = e.clientX;
+          const y = e.clientY;
+          dragState.ghostEl.style.left = x + 'px';
+          dragState.ghostEl.style.top = y + 'px';
+
+          const dropZone = document.getElementById('dropZone');
+          if (dropZone) {
+            const rect = dropZone.getBoundingClientRect();
+            const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+            dropZone.classList.toggle('drag-over', inside);
+          }
+        }
+
+        function onUp(e) {
+          if (!dragState) return cleanup();
+          const x = e.clientX;
+          const y = e.clientY;
+
+          const dropZone = document.getElementById('dropZone');
+          if (dropZone && x !== undefined && y !== undefined) {
+            const rect = dropZone.getBoundingClientRect();
+            const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+            if (inside && state.placedFlowers.length < MAX_FLOWERS) {
+              placeFlowerInSlot(dragState.flowerId, dragState.colorKey, rect, state.placedFlowers.length);
+            }
+          }
+          cleanup();
           renderStep1();
         }
-      });
-    });
 
-    // start drag from tray handles
-    root.querySelectorAll('.drag-handle').forEach(handle => {
-      handle.addEventListener('pointerdown', (e) => {
-        if(state.placedFlowers.length >= MAX_FLOWERS) return;
-        e.preventDefault();
-        const flowerId = handle.getAttribute('data-handle');
-        const colorKey = state.selectedColors[flowerId];
-        startDrag(flowerId, colorKey, e.clientX, e.clientY, handle);
-      });
-      // keyboard fallback: Enter/Space drops flower into the best open slot
-      handle.addEventListener('keydown', (e) => {
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          if(state.placedFlowers.length >= MAX_FLOWERS) return;
-          const flowerId = handle.getAttribute('data-handle');
-          const colorKey = state.selectedColors[flowerId];
-          dropFlowerAtCenter(flowerId, colorKey);
+        function cleanup() {
+          handleEl.removeEventListener('pointermove', onMove);
+          handleEl.removeEventListener('pointerup', onUp);
+          handleEl.removeEventListener('pointercancel', onUp);
+          try { handleEl.releasePointerCapture(pointerId); } catch (err) { }
+          if (dragState && dragState.ghostEl && dragState.ghostEl.parentNode) {
+            dragState.ghostEl.parentNode.removeChild(dragState.ghostEl);
+          }
+          document.body.classList.remove('dragging-flower');
+          handleEl.classList.remove('lifting');
+          dragState = null;
         }
-      });
-    });
 
-    // swatch clicks inside tray
-    root.querySelectorAll('.swatch').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const flowerId = btn.getAttribute('data-flower');
-        const colorKey = btn.getAttribute('data-color');
-        state.selectedColors[flowerId] = colorKey;
-        renderStep1();
-      });
-    });
-
-    root.querySelectorAll('.vase-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        state.selectedVase = btn.getAttribute('data-vase');
-        renderStep1();
-      });
-    });
-  }
-
-  function getPlacementForFlower(index, dropZoneRect){
-    const slots = [
-      { xOffset: -52, bottomOffset: 136, rotation: -18 },
-      { xOffset:  52, bottomOffset: 136, rotation:  18 },
-      { xOffset: -28, bottomOffset: 150, rotation: -8 },
-      { xOffset:  28, bottomOffset: 150, rotation:  8 },
-      { xOffset:   0, bottomOffset: 166, rotation:  0 },
-      { xOffset: -68, bottomOffset: 122, rotation: -24 },
-      { xOffset:  68, bottomOffset: 122, rotation:  24 },
-      { xOffset: -38, bottomOffset: 110, rotation: -10 },
-      { xOffset:  38, bottomOffset: 110, rotation:  10 }
-    ];
-    const vase = getSelectedVase();
-    const vaseSvgWidth = 220;
-    const vaseSvgHeight = 200;
-    const vaseRenderHeight = 200 * vaseSvgHeight / vaseSvgWidth;
-    const openingX = dropZoneRect.width / 2 + vase.openingPoint.x;
-    const openingY = vaseRenderHeight - vase.openingPoint.y * (vaseRenderHeight / vaseSvgHeight);
-    const slot = slots[index] || { xOffset: 0, bottomOffset: 158, rotation: 0 };
-    const x = openingX + slot.xOffset;
-    const bottomOffset = openingY - slot.bottomOffset;
-    const scale = PLACED_FLOWER_HEIGHT / 160;
-    return {
-      x: Math.round(x),
-      bottomOffset: Math.round(bottomOffset),
-      rotation: slot.rotation,
-      width: Math.round(80 * scale),
-      height: PLACED_FLOWER_HEIGHT,
-      stemZ: 2 + index,
-      headZ: 30 + index
-    };
-  }
-
-  function placeFlowerInSlot(flowerId, colorKey, dropZoneRect, index){
-    const placement = getPlacementForFlower(index, dropZoneRect);
-    uidCounter++;
-    state.placedFlowers.push({
-      flowerId, colorKey, uid: 'p'+uidCounter,
-      x: placement.x,
-      bottomOffset: placement.bottomOffset,
-      width: placement.width,
-      height: placement.height,
-      rotation: placement.rotation,
-      z: placement.z
-    });
-  }
-
-  function dropFlowerAtCenter(flowerId, colorKey){
-    const dropZone = document.getElementById('dropZone');
-    if(!dropZone) return;
-    const rect = dropZone.getBoundingClientRect();
-    placeFlowerInSlot(flowerId, colorKey, rect, state.placedFlowers.length);
-    renderStep1();
-  }
-
-  function startDrag(flowerId, colorKey, startX, startY, handleEl){
-    const hex = COLORS[colorKey] || colorKey;
-    const scale = PLACED_FLOWER_HEIGHT / 160;
-    const width = Math.round(80 * scale);
-    const height = PLACED_FLOWER_HEIGHT;
-
-    const ghost = document.createElement('div');
-    ghost.className = 'drag-ghost';
-    ghost.style.width = width + 'px';
-    ghost.style.height = height + 'px';
-    ghost.style.left = startX + 'px';
-    ghost.style.top = startY + 'px';
-    ghost.innerHTML = FLOWER_TYPES.find(x => x.id === flowerId).svg(hex);
-    document.body.appendChild(ghost);
-    document.body.classList.add('dragging-flower');
-    handleEl.classList.add('lifting');
-
-    dragState = { flowerId, colorKey, ghostEl: ghost, handleEl };
-
-    function onMove(e){
-      if(!dragState) return;
-      const x = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
-      const y = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
-      if(x === undefined) return;
-      dragState.ghostEl.style.left = x + 'px';
-      dragState.ghostEl.style.top = y + 'px';
-
-      const dropZone = document.getElementById('dropZone');
-      if(dropZone){
-        const rect = dropZone.getBoundingClientRect();
-        const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-        dropZone.classList.toggle('drag-over', inside);
+        handleEl.addEventListener('pointermove', onMove);
+        handleEl.addEventListener('pointerup', onUp);
+        handleEl.addEventListener('pointercancel', onUp);
       }
-    }
 
-    function onUp(e){
-      if(!dragState) return cleanup();
-      const x = e.clientX !== undefined ? e.clientX : (e.changedTouches && e.changedTouches[0].clientX);
-      const y = e.clientY !== undefined ? e.clientY : (e.changedTouches && e.changedTouches[0].clientY);
-
-      const dropZone = document.getElementById('dropZone');
-      if(dropZone && x !== undefined && y !== undefined){
-        const rect = dropZone.getBoundingClientRect();
-        const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-        if(inside && state.placedFlowers.length < MAX_FLOWERS){
-          placeFlowerInSlot(dragState.flowerId, dragState.colorKey, rect, state.placedFlowers.length);
-        }
-      }
-      cleanup();
-      renderStep1();
-    }
-
-    function cleanup(){
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', onUp);
-      document.removeEventListener('pointercancel', onUp);
-      if(dragState && dragState.ghostEl && dragState.ghostEl.parentNode){
-        dragState.ghostEl.parentNode.removeChild(dragState.ghostEl);
-      }
-      document.body.classList.remove('dragging-flower');
-      dragState = null;
-    }
-
-    document.addEventListener('pointermove', onMove);
-    document.addEventListener('pointerup', onUp);
-    document.addEventListener('pointercancel', onUp);
-  }
-
-  /* ---------------- STATIC VASE PREVIEW (used in steps 3 & 4) ---------------- */
-  function vaseSVG(){
-    const vase = getSelectedVase();
-    return `
+      /* ---------------- STATIC VASE PREVIEW (used in steps 3 & 4) ---------------- */
+      function vaseSVG() {
+        const vase = getSelectedVase();
+        return `
     <svg class="vase-base" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
       ${vase.svg}
     </svg>`;
-  }
+      }
 
-  // Renders a placed flower at a normalized position for the read-only preview stage
-  // (steps 3 & 4), scaling the original drop-zone coordinates into a fixed-size stage.
-  // Anchored at the stem base (left+bottom), matching how flowers are positioned live
-  // in the designer, so the bouquet looks identical here as it did when she built it.
-  function previewFlowerHTML(item, stageWidth, stageHeight){
-    const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
-    const hex = COLORS[item.colorKey] || item.colorKey;
-    const svgMarkup = f.svg(hex);
-    const left = `${Math.round(item.normX * stageWidth)}px`;
-    const bottom = `${Math.round(item.normBottom * stageHeight)}px`;
-    const baseStyle = `left:${left}; bottom:${bottom}; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg);`;
-    return `
+      // Renders a placed flower at a normalized position for the read-only preview stage
+      // (steps 3 & 4), scaling the original drop-zone coordinates into a fixed-size stage.
+      // Anchored at the stem base (left+bottom), matching how flowers are positioned live
+      // in the designer, so the bouquet looks identical here as it did when she built it.
+      function previewFlowerHTML(item, stageWidth, stageHeight) {
+        const f = FLOWER_TYPES.find(x => x.id === item.flowerId);
+        const hex = COLORS[item.colorKey] || item.colorKey;
+        const svgMarkup = f.svg(hex);
+        const left = `${Math.round(item.normX * stageWidth)}px`;
+        const bottom = `${Math.round(item.normBottom * stageHeight)}px`;
+        const baseStyle = `left:${left}; bottom:${bottom}; width:${item.width}px; height:${item.height}px; transform: translateX(-50%) rotate(${item.rotation}deg);`;
+        return `
       <div class="placed-flower stem-layer" style="${baseStyle} z-index:${item.stemZ};">
         <div class="flower-stem-layer">${svgMarkup}</div>
       </div>
       <div class="placed-flower head-layer" style="${baseStyle} z-index:${item.headZ};">
         <div class="flower-head-layer">${svgMarkup}</div>
       </div>`;
-  }
+      }
 
-  function ribbonSVG(){
-    return `
+      function ribbonSVG() {
+        return `
     <svg viewBox="0 0 100 40" style="position:absolute; left:50%; transform:translateX(-50%); bottom:150px; width:90px; z-index:25;" xmlns="http://www.w3.org/2000/svg">
       <path d="M20 10 L50 22 L20 32 Z" fill="var(--gold)"/>
       <path d="M80 10 L50 22 L80 32 Z" fill="var(--gold)"/>
-      <circle cx="50" cy="20" r="8" fill="${shade('#e3b97f',-10)}"/>
+      <circle cx="50" cy="20" r="8" fill="${shade('#e3b97f', -10)}"/>
     </svg>`;
-  }
+      }
 
-  // captures the current drop-zone's flower positions as normalized (0-1) coordinates
-  // so the same arrangement can be redrawn at a different size in steps 3 & 4
-  function snapshotArrangementForPreview(){
-    const dropZone = document.getElementById('dropZone');
-    let w = 320, h = 380;
-    if(dropZone){
-      const rect = dropZone.getBoundingClientRect();
-      if(rect.width > 0) w = rect.width;
-      if(rect.height > 0) h = rect.height;
-    }
-    state.previewArrangement = state.placedFlowers.map(item => ({
-      ...item,
-      normX: item.x / w,
-      normBottom: item.bottomOffset / h
-    }));
-  }
+      // captures the current drop-zone's flower positions as normalized (0-1) coordinates
+      // so the same arrangement can be redrawn at a different size in steps 3 & 4
+      function snapshotArrangementForPreview() {
+        const dropZone = document.getElementById('dropZone');
+        let w = 320, h = 380;
+        if (dropZone) {
+          const rect = dropZone.getBoundingClientRect();
+          if (rect.width > 0) w = rect.width;
+          if (rect.height > 0) h = rect.height;
+        }
+        state.previewArrangement = state.placedFlowers.map(item => ({
+          ...item,
+          normX: item.x / w,
+          normBottom: item.bottomOffset / h
+        }));
+      }
 
-  /* ---------------- STEP 3: DEDICATION ---------------- */
-  function renderStep3(){
-    const maxChars = 300;
-    root.className = '';
-    root.innerHTML = `
+      /* ---------------- STEP 3: DEDICATION ---------------- */
+      function renderStep3() {
+        const maxChars = 300;
+        root.className = '';
+        root.innerHTML = `
       <div class="screen">
         <div class="app-header">
           <div class="eyebrow">Almost there</div>
@@ -1306,59 +1516,59 @@
       </div>
     `;
 
-    const toInput = document.getElementById('toInput');
-    const fromInput = document.getElementById('fromInput');
-    const msgInput = document.getElementById('msgInput');
-    const charCount = document.getElementById('charCount');
+        const toInput = document.getElementById('toInput');
+        const fromInput = document.getElementById('fromInput');
+        const msgInput = document.getElementById('msgInput');
+        const charCount = document.getElementById('charCount');
 
-    toInput.addEventListener('input', () => state.to = toInput.value);
-    fromInput.addEventListener('input', () => state.from = fromInput.value);
-    msgInput.addEventListener('input', () => {
-      state.message = msgInput.value;
-      charCount.textContent = msgInput.value.length;
-    });
+        toInput.addEventListener('input', () => state.to = toInput.value);
+        fromInput.addEventListener('input', () => state.from = fromInput.value);
+        msgInput.addEventListener('input', () => {
+          state.message = msgInput.value;
+          charCount.textContent = msgInput.value.length;
+        });
 
-    document.getElementById('toStep4').addEventListener('click', () => { state.step = 4; render(); });
-    document.getElementById('backTo1from3').addEventListener('click', () => { state.step = 1; render(); });
-  }
+        document.getElementById('toStep4').addEventListener('click', () => { state.step = 4; render(); });
+        document.getElementById('backTo1from3').addEventListener('click', () => { state.step = 1; render(); });
+      }
 
-  function escapeHTML(str){
-    return (str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
+      function escapeHTML(str) {
+        return (str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
 
-  /* ---------------- STEP 4: REVEAL ---------------- */
-  function renderStep4(){
-    const STAGE_W = 420, STAGE_H = 420;
-    const arrangement = state.previewArrangement && state.previewArrangement.length
-      ? state.previewArrangement
-      : state.placedFlowers.map(item => ({...item, normX: 0.5, normY: 0.6}));
-    const flowersHTML = arrangement.map(item => previewFlowerHTML(item, STAGE_W, STAGE_H)).join('');
+      /* ---------------- STEP 4: REVEAL ---------------- */
+      function renderStep4() {
+        const STAGE_W = 420, STAGE_H = 420;
+        const arrangement = state.previewArrangement && state.previewArrangement.length
+          ? state.previewArrangement
+          : state.placedFlowers.map(item => ({ ...item, normX: 0.5, normY: 0.6 }));
+        const flowersHTML = arrangement.map(item => previewFlowerHTML(item, STAGE_W, STAGE_H)).join('');
 
-    const petalColors = ['#f0a8c0','#f7dce0','#eab8c2','#e3d6f0'];
-    let petals = '';
-    for(let i=0;i<14;i++){
-      const left = rand(2,96).toFixed(1);
-      const dur = rand(9,16).toFixed(1);
-      const delay = rand(0,10).toFixed(1);
-      const drift = rand(-60,60).toFixed(0);
-      const size = rand(8,16).toFixed(0);
-      const color = petalColors[i % petalColors.length];
-      petals += `<div class="petal" style="left:${left}%; width:${size}px; height:${size}px; background:${color}; border-radius: 0 50% 50% 50%; animation-duration:${dur}s; animation-delay:${delay}s; --drift:${drift}px;"></div>`;
-    }
+        const petalColors = ['#f0a8c0', '#f7dce0', '#eab8c2', '#e3d6f0'];
+        let petals = '';
+        for (let i = 0; i < 14; i++) {
+          const left = rand(2, 96).toFixed(1);
+          const dur = rand(9, 16).toFixed(1);
+          const delay = rand(0, 10).toFixed(1);
+          const drift = rand(-60, 60).toFixed(0);
+          const size = rand(8, 16).toFixed(0);
+          const color = petalColors[i % petalColors.length];
+          petals += `<div class="petal" style="left:${left}%; width:${size}px; height:${size}px; background:${color}; border-radius: 0 50% 50% 50%; animation-duration:${dur}s; animation-delay:${delay}s; --drift:${drift}px;"></div>`;
+        }
 
-    const sparkles = [
-      {top:'18%', left:'30%', delay:'0s'},
-      {top:'25%', left:'68%', delay:'.8s'},
-      {top:'40%', left:'20%', delay:'1.6s'},
-      {top:'15%', left:'52%', delay:'2.2s'}
-    ].map(s => `<div class="sparkle" style="top:${s.top}; left:${s.left}; animation-delay:${s.delay};">✨</div>`).join('');
+        const sparkles = [
+          { top: '18%', left: '30%', delay: '0s' },
+          { top: '25%', left: '68%', delay: '.8s' },
+          { top: '40%', left: '20%', delay: '1.6s' },
+          { top: '15%', left: '52%', delay: '2.2s' }
+        ].map(s => `<div class="sparkle" style="top:${s.top}; left:${s.left}; animation-delay:${s.delay};">✨</div>`).join('');
 
-    const toName = state.to.trim() || 'You';
-    const fromName = state.from.trim() || 'Someone who cares';
-    const message = state.message.trim() || 'A little bouquet, made just for you.';
+        const toName = state.to.trim() || 'You';
+        const fromName = state.from.trim() || 'Someone who cares';
+        const message = state.message.trim() || 'A little bouquet, made just for you.';
 
-    root.className = '';
-    root.innerHTML = `
+        root.className = '';
+        root.innerHTML = `
       <div class="petal-field">${petals}</div>
       <div class="reveal-screen">
         <div class="reveal-vase-wrap">
@@ -1382,14 +1592,15 @@
       </div>
     `;
 
-    document.getElementById('restartBtn').addEventListener('click', () => {
-      state = { step:1, selectedColors:{}, placedFlowers:[], previewArrangement:[], selectedVase:'classic', to:'', from:'', message:'' };
-      render();
-    });
-  }
+        document.getElementById('restartBtn').addEventListener('click', () => {
+          state = { step: 1, selectedColors: {}, placedFlowers: [], previewArrangement: [], selectedVase: 'classic', to: '', from: '', message: '' };
+          render();
+        });
+      }
 
-  render();
-})();
-</script>
+      render();
+    })();
+  </script>
 </body>
+
 </html>
