@@ -1296,18 +1296,18 @@
       }
 
       function getPlacementForFlower(index, dropZoneRect) {
-        // Tighter, more natural bouquet fan — flowers cluster into the vase neck
-        // instead of sticking out past its sides.
+        // Built-in bouquet slots keep each flower snapped into a more natural mid-vase
+        // arrangement instead of dropping them directly against the vase base.
         const slots = [
-          { xOffset: -30, bottomOffset: 138, rotation: -14 },
-          { xOffset: 30, bottomOffset: 138, rotation: 14 },
-          { xOffset: -16, bottomOffset: 152, rotation: -6 },
-          { xOffset: 16, bottomOffset: 152, rotation: 6 },
-          { xOffset: 0, bottomOffset: 168, rotation: 0 },
-          { xOffset: -42, bottomOffset: 122, rotation: -20 },
-          { xOffset: 42, bottomOffset: 122, rotation: 20 },
-          { xOffset: -22, bottomOffset: 108, rotation: -9 },
-          { xOffset: 22, bottomOffset: 108, rotation: 9 }
+          { xOffset: -36, bottomOffset: 82, rotation: -15 },
+          { xOffset: 36, bottomOffset: 82, rotation: 15 },
+          { xOffset: -18, bottomOffset: 98, rotation: -6 },
+          { xOffset: 18, bottomOffset: 98, rotation: 6 },
+          { xOffset: 0, bottomOffset: 112, rotation: 0 },
+          { xOffset: -48, bottomOffset: 68, rotation: -20 },
+          { xOffset: 48, bottomOffset: 68, rotation: 20 },
+          { xOffset: -24, bottomOffset: 56, rotation: -8 },
+          { xOffset: 24, bottomOffset: 56, rotation: 8 }
         ];
         const vase = getSelectedVase();
         const vaseSvgWidth = 220;
@@ -1316,17 +1316,14 @@
         const vaseRenderHeight = vaseRenderWidth * vaseSvgHeight / vaseSvgWidth;
         const openingX = dropZoneRect.width / 2 + vase.openingPoint.x;
         const openingY = vaseRenderHeight - vase.openingPoint.y * (vaseRenderHeight / vaseSvgHeight);
-        const slot = slots[index % slots.length] || { xOffset: 0, bottomOffset: 158, rotation: 0 };
-        // small random jitter so it doesn't look robotic/identical every time
-        const jitterX = (Math.random() - 0.5) * 8;
-        const jitterR = (Math.random() - 0.5) * 4;
-        const x = openingX + slot.xOffset + jitterX;
+        const slot = slots[index % slots.length] || slots[0];
+        const x = openingX + slot.xOffset;
         const bottomOffset = openingY - slot.bottomOffset;
         const scale = PLACED_FLOWER_HEIGHT / 160;
         return {
           x: Math.round(x),
           bottomOffset: Math.round(bottomOffset),
-          rotation: slot.rotation + jitterR,
+          rotation: slot.rotation,
           width: Math.round(80 * scale),
           height: PLACED_FLOWER_HEIGHT,
           stemZ: 2 + index,
